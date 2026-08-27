@@ -6,12 +6,12 @@ VALUES
     ('TECHNICIAN', 'Technician'),
     ('STOREKEEPER', 'Storekeeper');
 
-INSERT INTO skill (skill_code, name, description)
+INSERT INTO skill (skill_code, name, time,description)
 VALUES
-    ('OIL_SERVICE', 'Oil Service', 'Oil and filter replacement'),
-    ('BRAKE_SERVICE', 'Brake Service', 'Brake inspection and repair'),
-    ('ENGINE_DIAGNOSTICS', 'Engine Diagnostics', 'Engine diagnostic work'),
-    ('TYRE_SERVICE', 'Tyre Service', 'Tyre inspection and replacement');
+    ('OIL_SERVICE', 'Oil Service', 60 ,'Oil and filter replacement'),
+    ('BRAKE_SERVICE', 'Brake Service', 45 ,'Brake inspection and repair'),
+    ('ENGINE_DIAGNOSTICS', 'Engine Diagnostics', 30 ,'Engine diagnostic work'),
+    ('TYRE_SERVICE', 'Tyre Service', 60,'Tyre inspection and replacement');
 
 INSERT INTO capability
 (

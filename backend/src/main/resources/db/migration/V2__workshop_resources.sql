@@ -90,12 +90,17 @@ CREATE TABLE skill
 (
     skill_code  VARCHAR(50)  NOT NULL,
     name        VARCHAR(100) NOT NULL,
-    description VARCHAR(500),
+    description VARCHAR(255) NOT NULL,
+    time        BIGINT       NOT NULL,
 
     CONSTRAINT pk_skill PRIMARY KEY (skill_code),
-    CONSTRAINT uk_skill_name UNIQUE (name),
+    CONSTRAINT time_not_zero CHECK(time>0),
     CONSTRAINT ck_skill_code_not_blank
-        CHECK (btrim(skill_code) <> '')
+        CHECK (btrim(skill_code) <> ''),
+    CONSTRAINT ck_skill_description_not_blank
+        CHECK (btrim(description) <> ''),
+    CONSTRAINT ck_skill_name_not_blank
+        CHECK (btrim(name) <> '')
 );
 
 CREATE TABLE technician
