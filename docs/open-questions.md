@@ -45,3 +45,5 @@ Both?
 12. Does SLA pause if customer depot becomes unreachable?
 
 13. Is there a maximum future booking horizon?
+
+14. The Feasible-Slot Engine signature includes a `searchHorizon` parameter, but the specification does not define its exact structure.
