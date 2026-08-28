@@ -16,6 +16,7 @@ import com.example.backend.service.AuthService;
 import com.example.backend.security.JwtService;
 
 import jakarta.validation.Valid;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -57,11 +58,9 @@ public class AuthController {
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(token);
         }
-        jwtService.extractRoles(token).stream().forEach(role -> {
-            System.out.println("User has role: " + role);
-        });
+       
 
-        return ResponseEntity.ok("Pong " + jwtService.extractUsername(token));
+        return ResponseEntity.ok("Pong " + jwtService.extractUsername(token) + " " + jwtService.extractRoles(token).stream().collect(Collectors.joining(", ")));
     }
 
 }

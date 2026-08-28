@@ -1,6 +1,7 @@
 package com.example.backend.security;
 
 import java.util.Base64;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
 import java.util.List;
@@ -27,7 +28,14 @@ public class JwtService {
 
   //  private static String secret = Jwts.SIG.HS256.key()
     private static long expirationms = 3600000;
-    public JwtService(@Value("${jwt.secret}") String secret , @Value("${jwt.expiration-ms}") long expirationMs){
+
+    // ==========================
+   
+    //    TO DO HERE  
+ 
+
+
+    public JwtService(@Value("${jwt.secret}") String secret , @Value("${jwt.expiration-ms}") long expirationMs){  
    //  public JwtService(){
       //  this.signingKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secret.getBytes()));
       this.signingKey = Jwts.SIG.HS256.key().build();  
@@ -37,6 +45,9 @@ public class JwtService {
 
     }
     
+    // secret need to be done correctly implemented !!!!
+
+     // ========================== 
 
     public String generateToken(String username , Set<String> roles){
         Date now = new Date();
@@ -73,17 +84,17 @@ public class JwtService {
 
     public List<String> extractRoles(String token){
         
-         Set<?> roles=null;
+         Collection<?> roles=null;
 
         try{
-        roles = parseClaims(token).get("roles",Set.class);
+        roles = parseClaims(token).get("roles",Collection.class);
        
         }
         catch(Exception e){
-            System.out.println("[ERROR] : "+e.getMessage());
+            System.out.println("[ERROR] : "+ e.getMessage());
         }
         
-         return roles == null ? List.of() : ((List<?>)roles).stream().map(String::valueOf).collect(Collectors.toList());
+         return roles == null ? List.of() : roles.stream().map(String::valueOf).collect(Collectors.toList());
 
     }
 

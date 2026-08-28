@@ -88,7 +88,6 @@ public class AppUser {
         this.isActive = isActive;
     }
 
-   
     public Set<Role> getRoles() {
         return roles;
     }
