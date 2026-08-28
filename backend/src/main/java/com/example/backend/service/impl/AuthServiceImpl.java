@@ -5,10 +5,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.repository.*;
+import com.example.backend.security.JwtService;
 import com.example.backend.dto.auth.*;
 import com.example.backend.service.AuthService;
 import com.example.backend.entity.*;
 import com.example.backend.exception.*;
+
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,13 +23,15 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     private static final String DEFAULT_ROLE_CODE = "TECHNICIAN";
 
-    public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
 
@@ -51,10 +55,9 @@ public class AuthServiceImpl implements AuthService {
         user.setRoles(roles);
 
         AppUser saved = userRepository.save(user);
-        String token = "TODO JWT TOKEN";
 
-        return toAuthResponse(saved,token);
-
+        String token = jwtService.generateToken(user.getUsername(), Set.of(DEFAULT_ROLE_CODE));  // single role
+        return toAuthResponse(saved, token);
     }
 
     
@@ -71,7 +74,7 @@ public class AuthServiceImpl implements AuthService {
             throw new AuthenticationFailedException("User account is inactive");
         }
 
-        String token = "TODO JWT TOKEN";
+        String token = jwtService.generateToken(user.getUsername(), user.getRoles().stream().map(Role::getRoleCode).collect(Collectors.toSet()));
         return toAuthResponse(user, token);
     }
 
