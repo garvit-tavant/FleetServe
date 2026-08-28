@@ -18,9 +18,6 @@ Should they be unified?
 Current design:- capability is vehicle and bay restriction
 skill is technical qualification
 
-6. How does reservation work if reservation
-is not a ledger movement?
-
 7. If required parts cannot be reserved, should we:
 Booking fail?
 Booking become pending(extend the slot)?
