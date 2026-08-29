@@ -142,8 +142,7 @@ CREATE TABLE odometer_reading
             ON DELETE RESTRICT,
 
     CONSTRAINT ck_odometer_reading
-        CHECK (reading_km >= 0),
-
+        CHECK ( reading_km >= 0 ),                                                                                                                              
     CONSTRAINT ck_odometer_source
         CHECK
             (
