@@ -220,3 +220,31 @@ src/main/java/com/fleetserve/backend
     ├── entity
     ├── dto
     └── mapper
+
+
+Validation Stages to implement in all
+Request DTO annotations
+-----------------------
+Required fields
+Blank strings
+Maximum lengths
+Positive or non-negative numbers
+Past/present date format
+
+Service layer
+-------------
+VIN/code uniqueness
+Referenced entity existence
+At least one plan interval exists
+Odometer monotonicity
+Asset retirement blockers
+State transitions
+Ownership and authorization
+
+Flyway/PostgreSQL
+-----------------
+Primary keys
+Foreign keys
+Unique constraints
+CHECK constraints
+Final data-integrity guarantee

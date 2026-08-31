@@ -160,7 +160,9 @@ SELECT
 FROM asset_class ac
          CROSS JOIN maintenance_plan mp
 WHERE ac.code = 'PASSENGER_CAR'
-  AND mp.code = 'STANDARD_10K_SERVICE';
+  AND mp.code = 'STANDARD_10K_SERVICE'
+    ON CONFLICT (asset_class_id, maintenance_plan_id)
+DO NOTHING;
 
 INSERT INTO asset
 (

@@ -60,20 +60,26 @@ CREATE TABLE maintenance_plan
 
 CREATE TABLE asset_class_plan
 (
-    asset_class_id     BIGINT NOT NULL,
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+
+    asset_class_id BIGINT NOT NULL,
+
     maintenance_plan_id BIGINT NOT NULL,
 
     CONSTRAINT pk_asset_class_plan
-        PRIMARY KEY (asset_class_id, maintenance_plan_id),
+        PRIMARY KEY (id),
+
+    CONSTRAINT uk_asset_class_plan
+        UNIQUE (asset_class_id, maintenance_plan_id),
 
     CONSTRAINT fk_asset_class_plan_class
         FOREIGN KEY (asset_class_id)
-            REFERENCES asset_class (id)
+            REFERENCES asset_class(id)
             ON DELETE RESTRICT,
 
     CONSTRAINT fk_asset_class_plan_plan
         FOREIGN KEY (maintenance_plan_id)
-            REFERENCES maintenance_plan (id)
+            REFERENCES maintenance_plan(id)
             ON DELETE RESTRICT
 );
 
