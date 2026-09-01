@@ -37,8 +37,7 @@ public class SecurityConfig {
             .formLogin(form -> form.disable())   // disabled — login is handled manually in AuthServiceImpl
             .httpBasic(basic -> basic.disable())  // disabled — no basic auth, JWT only -- > username:password encoded
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
             )
             .sessionManagement(sess -> sess
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
