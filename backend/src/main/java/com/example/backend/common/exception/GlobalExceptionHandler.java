@@ -4,6 +4,9 @@ import com.example.backend.AssetManagamentService.exception.AssetRetirementBlock
 import com.example.backend.AssetManagamentService.exception.BusinessValidationException;
 import com.example.backend.AssetManagamentService.exception.DuplicateResourceException;
 import com.example.backend.AssetManagamentService.exception.ResourceNotFoundException;
+import com.example.backend.SecurityService.exception.AuthenticationFailedException;
+import com.example.backend.SecurityService.exception.DuplicateUsernameException;
+import org.springframework.security.access.AccessDeniedException;
 import jakarta.persistence.PessimisticLockException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -39,6 +42,45 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(AuthenticationFailedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAuthenticationFailed(
+            AuthenticationFailedException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.UNAUTHORIZED,
+                exception.getMessage(),
+                request.getRequestURI(),
+                null
+        );
+    }
+
+    @ExceptionHandler(DuplicateUsernameException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateUsername(
+            DuplicateUsernameException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                exception.getMessage(),
+                request.getRequestURI(),
+                null
+        );
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAccessDenied(
+            AccessDeniedException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.FORBIDDEN,
+                "You do not have permission to perform this action",
+                request.getRequestURI(),
+                null
+        );
+    }
+
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<ApiErrorResponse> handleDuplicate(
             DuplicateResourceException exception,
@@ -59,7 +101,7 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
         return buildResponse(
-                HttpStatus.UNPROCESSABLE_ENTITY,
+                HttpStatus.resolve(422),
                 exception.getMessage(),
                 request.getRequestURI(),
                 null
