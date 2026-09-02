@@ -44,3 +44,14 @@ Both?
 13. Is there a maximum future booking horizon?
 
 14. The Feasible-Slot Engine signature includes a `searchHorizon` parameter, but the specification does not define its exact structure.
+
+15. How to map bay with workshop?
+Currently, we are going manywithone relationship between bay and workshop and not many to many
+
+Name in skills table is not unique
+
+16. Question: Can a technician have overlapping certifications for the same skill?
+
+Decision: No.
+
+Reason: Certification validity periods must not overlap. This avoids ambiguity during scheduling and allows a deterministic answer to the question: "Is this technician certified for this skill on date X

@@ -21,7 +21,8 @@ public class AssetManagementMapper {
         response.setVin(asset.getVin());
         response.setAssetClassId(asset.getAssetClass().getId());
         response.setAssetClassCode(asset.getAssetClass().getCode());
-        response.setHomeDepotId(asset.getHomeDepotId());
+        response.setHomeDepotId(asset.getHomeDepot().getId());
+        response.setHomeDepotCode(asset.getHomeDepot().getCode());
         response.setAcquisitionDate(asset.getAcquisitionDate());
         response.setAcquisitionOdometerKm(
                 asset.getAcquisitionOdometerKm()

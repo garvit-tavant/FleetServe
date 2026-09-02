@@ -21,6 +21,8 @@ import com.example.backend.AssetManagamentService.repository.OdometerReadingRepo
 import com.example.backend.AssetManagamentService.service.AssetService;
 import com.example.backend.AssetManagamentService.source.OdometerSource;
 import com.example.backend.AssetManagamentService.status.AssetStatus;
+import com.example.backend.CapacityAndSchedulingService.entity.Depot;
+import com.example.backend.CapacityAndSchedulingService.repository.DepotRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +43,7 @@ public class AssetServiceImpl implements AssetService {
     private final AssetRetirementBlockerPort retirementBlockerPort;
     private final CurrentUserProvider currentUserProvider;
     private final AssetManagementMapper mapper;
+    private final DepotRepository depotRepository;
 
     public AssetServiceImpl(
             AssetRepository assetRepository,
@@ -48,7 +51,8 @@ public class AssetServiceImpl implements AssetService {
             OdometerReadingRepository odometerRepository,
             AssetRetirementBlockerPort retirementBlockerPort,
             CurrentUserProvider currentUserProvider,
-            AssetManagementMapper mapper
+            AssetManagementMapper mapper,
+            DepotRepository depotRepository, DepotRepository depotRepository1
     ) {
         this.assetRepository = assetRepository;
         this.assetClassRepository = assetClassRepository;
@@ -56,6 +60,7 @@ public class AssetServiceImpl implements AssetService {
         this.retirementBlockerPort = retirementBlockerPort;
         this.currentUserProvider = currentUserProvider;
         this.mapper = mapper;
+        this.depotRepository = depotRepository;
     }
 
     @Override
@@ -86,10 +91,11 @@ public class AssetServiceImpl implements AssetService {
                 );
 
         Asset asset = new Asset();
-
+        Depot homeDepot = depotRepository.findById(request.getHomeDepotId())
+                        .orElseThrow(()-> new ResourceNotFoundException("Depot not found with id" + request.getHomeDepotId()));
         asset.setVin(normalizedVin);
         asset.setAssetClass(assetClass);
-        asset.setHomeDepotId(request.getHomeDepotId());
+        asset.setHomeDepot(homeDepot);
         asset.setAcquisitionDate(
                 request.getAcquisitionDate()
         );

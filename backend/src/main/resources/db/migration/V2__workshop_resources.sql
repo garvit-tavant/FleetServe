@@ -4,6 +4,7 @@ CREATE TABLE depot
     code      VARCHAR(30)  NOT NULL,
     region    VARCHAR(100) NOT NULL,
     is_active BOOLEAN      NOT NULL DEFAULT TRUE,
+    version BIGINT NOT NULL DEFAULT 0,
 
     CONSTRAINT pk_depot PRIMARY KEY (id),
     CONSTRAINT uk_depot_code UNIQUE (code),
@@ -20,6 +21,7 @@ CREATE TABLE workshop
     depot_id  BIGINT       NOT NULL,
     time_zone VARCHAR(100) NOT NULL,
     is_active BOOLEAN      NOT NULL DEFAULT TRUE,
+    version BIGINT NOT NULL DEFAULT 0,
 
     CONSTRAINT pk_workshop PRIMARY KEY (id),
     CONSTRAINT uk_workshop_code UNIQUE (code),
@@ -41,10 +43,11 @@ CREATE TABLE service_bay
     workshop_id BIGINT      NOT NULL,
     bay_code    VARCHAR(30) NOT NULL,
     is_active   BOOLEAN     NOT NULL DEFAULT TRUE,
+    version BIGINT NOT NULL DEFAULT 0,
 
     CONSTRAINT pk_service_bay PRIMARY KEY (id),
-    CONSTRAINT uk_service_bay_workshop_code
-        UNIQUE (workshop_id, bay_code),
+    CONSTRAINT uk_service_bay_code
+        UNIQUE (bay_code),
 
     CONSTRAINT fk_service_bay_workshop
         FOREIGN KEY (workshop_id)
@@ -57,32 +60,44 @@ CREATE TABLE service_bay
 
 CREATE TABLE capability
 (
-    capability_code VARCHAR(50)  NOT NULL,
+    capability_code VARCHAR(50) NOT NULL,
     name            VARCHAR(100) NOT NULL,
     description     VARCHAR(500),
+    version         BIGINT NOT NULL DEFAULT 0,
 
-    CONSTRAINT pk_capability PRIMARY KEY (capability_code),
-    CONSTRAINT uk_capability_name UNIQUE (name),
+    CONSTRAINT pk_capability
+        PRIMARY KEY (capability_code),
+
+    CONSTRAINT uk_capability_name
+        UNIQUE (name),
+
     CONSTRAINT ck_capability_code_not_blank
-        CHECK (btrim(capability_code) <> '')
+        CHECK (btrim(capability_code) <> ''),
+
+    CONSTRAINT ck_capability_name_not_blank
+        CHECK (btrim(name) <> '')
 );
 
 CREATE TABLE bay_capability
 (
-    bay_id          BIGINT      NOT NULL,
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    bay_id BIGINT NOT NULL,
     capability_code VARCHAR(50) NOT NULL,
 
     CONSTRAINT pk_bay_capability
-        PRIMARY KEY (bay_id, capability_code),
+        PRIMARY KEY (id),
+
+    CONSTRAINT uk_bay_capability
+        UNIQUE (bay_id, capability_code),
 
     CONSTRAINT fk_bay_capability_bay
         FOREIGN KEY (bay_id)
-            REFERENCES service_bay (id)
+            REFERENCES service_bay(id)
             ON DELETE RESTRICT,
 
     CONSTRAINT fk_bay_capability_capability
         FOREIGN KEY (capability_code)
-            REFERENCES capability (capability_code)
+            REFERENCES capability(capability_code)
             ON DELETE RESTRICT
 );
 
@@ -92,6 +107,7 @@ CREATE TABLE skill
     name        VARCHAR(100) NOT NULL,
     description VARCHAR(255) NOT NULL,
     time        BIGINT       NOT NULL,
+    version         BIGINT NOT NULL DEFAULT 0,
 
     CONSTRAINT pk_skill PRIMARY KEY (skill_code),
     CONSTRAINT time_not_zero CHECK(time>0),
@@ -110,6 +126,7 @@ CREATE TABLE technician
     workshop_id  BIGINT        NOT NULL,
     hourly_rate  NUMERIC(12,2) NOT NULL,
     is_active    BOOLEAN       NOT NULL DEFAULT TRUE,
+    version         BIGINT NOT NULL DEFAULT 0,
 
     CONSTRAINT pk_technician PRIMARY KEY (id),
     CONSTRAINT uk_technician_app_user UNIQUE (app_user_id),
