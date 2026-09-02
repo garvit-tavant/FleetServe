@@ -41,7 +41,7 @@ public class AppUser {
     @Column(name = "is_active")
     private Boolean isActive;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)  // not LAZY since we are going to use this request to request so EAGER fetching
     @JoinTable(
         name="user_role",
         joinColumns = @JoinColumn(name = "app_user_id",
