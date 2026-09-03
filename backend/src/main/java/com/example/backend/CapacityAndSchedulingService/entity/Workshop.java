@@ -43,10 +43,17 @@ public class Workshop {
     private Long version;
 
     @OneToMany(
-            mappedBy = "workshop",
-            cascade = CascadeType.ALL
+            mappedBy = "workshop"
     )
     private List<Bay> bays =
+            new ArrayList<>();
+
+    @OneToMany(mappedBy = "workshop")
+    private List<WorkingCalendar> workingCalendars =
+            new ArrayList<>();
+
+    @OneToMany(mappedBy = "workshop")
+    private List<Holiday> holidays =
             new ArrayList<>();
 
     public Workshop() {
@@ -108,5 +115,21 @@ public class Workshop {
 
     public void setDepot(Depot depot) {
         this.depot = depot;
+    }
+
+    public List<WorkingCalendar> getWorkingCalendars() {
+        return workingCalendars;
+    }
+
+    public void setWorkingCalendars(List<WorkingCalendar> workingCalendars) {
+        this.workingCalendars = workingCalendars;
+    }
+
+    public List<Holiday> getHolidays() {
+        return holidays;
+    }
+
+    public void setHolidays(List<Holiday> holidays) {
+        this.holidays = holidays;
     }
 }

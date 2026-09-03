@@ -34,6 +34,8 @@ public class GlobalExceptionHandler {
             ResourceNotFoundException exception,
             HttpServletRequest request
     ) {
+
+        exception.printStackTrace();
         return buildResponse(
                 HttpStatus.NOT_FOUND,
                 exception.getMessage(),

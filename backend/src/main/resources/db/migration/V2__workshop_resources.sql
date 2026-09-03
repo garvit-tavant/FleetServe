@@ -179,7 +179,7 @@ CREATE TABLE working_calendar
     day_of_week SMALLINT NOT NULL,
     open_time   TIME     NOT NULL,
     close_time  TIME     NOT NULL,
-
+    version BIGINT NOT NULL DEFAULT 0,
     CONSTRAINT pk_working_calendar PRIMARY KEY (id),
 
     CONSTRAINT uk_working_calendar_workshop_day
@@ -203,7 +203,7 @@ CREATE TABLE holiday
     workshop_id BIGINT,
     holiday_date DATE         NOT NULL,
     description VARCHAR(255) NOT NULL,
-
+    version BIGINT NOT NULL DEFAULT 0,
     CONSTRAINT pk_holiday PRIMARY KEY (id),
 
     CONSTRAINT fk_holiday_workshop
