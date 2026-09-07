@@ -12,7 +12,7 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "work_order_parts")
+@Table(name = "work_order_part")
 public class WorkOrderPart {
     /*
       id            BIGINT GENERATED ALWAYS AS IDENTITY,

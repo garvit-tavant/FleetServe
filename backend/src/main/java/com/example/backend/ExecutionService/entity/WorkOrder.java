@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "work_orders")
+@Table(name = "work_order")
 public class WorkOrder {
     /*
      id                  BIGINT GENERATED ALWAYS AS IDENTITY,
