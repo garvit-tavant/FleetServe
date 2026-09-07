@@ -1,14 +1,20 @@
 CREATE TABLE part
 (
-    id              BIGINT GENERATED ALWAYS AS IDENTITY,
-    part_number     VARCHAR(100)  NOT NULL,
-    description     VARCHAR(500)  NOT NULL,
-    unit_of_measure VARCHAR(30)   NOT NULL,
-    standard_cost   NUMERIC(12,2) NOT NULL,
-    is_active       BOOLEAN       NOT NULL DEFAULT TRUE,
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
 
-    CONSTRAINT pk_part PRIMARY KEY (id),
-    CONSTRAINT uk_part_number UNIQUE (part_number),
+    part_number VARCHAR(100) NOT NULL,
+    description VARCHAR(500) NOT NULL,
+
+    unit_of_measure VARCHAR(30) NOT NULL,
+
+    standard_cost NUMERIC(12,2) NOT NULL,
+
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+
+    version BIGINT NOT NULL DEFAULT 0,
+
+    CONSTRAINT pk_part PRIMARY KEY(id),
+    CONSTRAINT uk_part_number UNIQUE(part_number),
 
     CONSTRAINT ck_part_number_not_blank
         CHECK (btrim(part_number) <> ''),
@@ -22,42 +28,56 @@ CREATE TABLE part
 
 CREATE TABLE part_reorder_level
 (
-    part_id       BIGINT         NOT NULL,
-    workshop_id   BIGINT         NOT NULL,
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+
+    part_id BIGINT NOT NULL,
+
+    workshop_id BIGINT NOT NULL,
+
     reorder_level NUMERIC(12,3) NOT NULL,
 
+    version BIGINT NOT NULL DEFAULT 0,
+
     CONSTRAINT pk_part_reorder_level
-        PRIMARY KEY (part_id, workshop_id),
+        PRIMARY KEY(id),
 
-    CONSTRAINT fk_reorder_level_part
-        FOREIGN KEY (part_id)
-            REFERENCES part (id)
-            ON DELETE RESTRICT,
+    CONSTRAINT uk_part_reorder_level
+        UNIQUE(part_id, workshop_id),
 
-    CONSTRAINT fk_reorder_level_workshop
-        FOREIGN KEY (workshop_id)
-            REFERENCES workshop (id)
-            ON DELETE RESTRICT,
+    CONSTRAINT fk_part_reorder_level_part
+        FOREIGN KEY(part_id)
+            REFERENCES part(id),
 
-    CONSTRAINT ck_reorder_level
-        CHECK (reorder_level >= 0)
+    CONSTRAINT fk_part_reorder_level_workshop
+        FOREIGN KEY(workshop_id)
+            REFERENCES workshop(id)
 );
 
 CREATE TABLE inventory_movement
 (
-    id               BIGINT GENERATED ALWAYS AS IDENTITY,
-    part_id          BIGINT         NOT NULL,
-    workshop_id      BIGINT         NOT NULL,
-    movement_type    VARCHAR(30)    NOT NULL,
-    signed_quantity  NUMERIC(12,3) NOT NULL,
-    unit_cost        NUMERIC(12,2) NOT NULL,
-    work_order_id    BIGINT,
-    transfer_reference VARCHAR(100),
-    reason           VARCHAR(1000),
-    actor_id         BIGINT         NOT NULL,
-    occurred_at      TIMESTAMPTZ    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
 
-    CONSTRAINT pk_inventory_movement PRIMARY KEY (id),
+    part_id BIGINT NOT NULL,
+
+    workshop_id BIGINT NOT NULL,
+
+    movement_type VARCHAR(30) NOT NULL,
+
+    signed_quantity NUMERIC(12,3) NOT NULL,
+
+    unit_cost NUMERIC(12,2) NOT NULL,
+
+    transfer_reference VARCHAR(100),
+
+    reason VARCHAR(1000),
+
+    recorded_by VARCHAR(100) NOT NULL,
+
+    occurred_at TIMESTAMPTZ NOT NULL
+        DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT pk_inventory_movement
+        PRIMARY KEY (id),
 
     CONSTRAINT fk_inventory_movement_part
         FOREIGN KEY (part_id)
@@ -69,19 +89,8 @@ CREATE TABLE inventory_movement
             REFERENCES workshop (id)
             ON DELETE RESTRICT,
 
-    CONSTRAINT fk_inventory_movement_work_order
-        FOREIGN KEY (work_order_id)
-            REFERENCES work_order (id)
-            ON DELETE RESTRICT,
-
-    CONSTRAINT fk_inventory_movement_actor
-        FOREIGN KEY (actor_id)
-            REFERENCES app_user (id)
-            ON DELETE RESTRICT,
-
     CONSTRAINT ck_inventory_movement_type
-        CHECK
-            (
+        CHECK (
             movement_type IN
             (
              'RECEIPT',
@@ -94,11 +103,12 @@ CREATE TABLE inventory_movement
             ),
 
     CONSTRAINT ck_inventory_quantity_non_zero
-        CHECK (signed_quantity <> 0),
+        CHECK (
+            signed_quantity <> 0
+            ),
 
     CONSTRAINT ck_inventory_quantity_sign
-        CHECK
-            (
+        CHECK (
             (
                 movement_type IN
                 (
@@ -108,7 +118,9 @@ CREATE TABLE inventory_movement
                     )
                     AND signed_quantity > 0
                 )
+
                 OR
+
             (
                 movement_type IN
                 (
@@ -117,14 +129,20 @@ CREATE TABLE inventory_movement
                     )
                     AND signed_quantity < 0
                 )
-                OR movement_type = 'ADJUSTMENT'
+
+                OR
+
+            (
+                movement_type = 'ADJUSTMENT'
+                )
             ),
 
     CONSTRAINT ck_inventory_adjustment_reason
-        CHECK
-            (
+        CHECK (
             movement_type <> 'ADJUSTMENT'
+
                 OR
+
             (
                 reason IS NOT NULL
                     AND btrim(reason) <> ''
@@ -132,24 +150,29 @@ CREATE TABLE inventory_movement
             ),
 
     CONSTRAINT ck_inventory_unit_cost
-        CHECK (unit_cost >= 0),
-
-    CONSTRAINT ck_inventory_reference
-        CHECK
-            (
-            movement_type NOT IN ('ISSUE', 'RETURN')
-                OR work_order_id IS NOT NULL
+        CHECK (
+            unit_cost >= 0
             ),
 
     CONSTRAINT ck_inventory_transfer_reference
-        CHECK
+        CHECK (
+            movement_type NOT IN
             (
-            movement_type NOT IN ('TRANSFER_IN', 'TRANSFER_OUT')
+             'TRANSFER_IN',
+             'TRANSFER_OUT'
+                )
+
                 OR
+
             (
                 transfer_reference IS NOT NULL
                     AND btrim(transfer_reference) <> ''
                 )
+            ),
+
+    CONSTRAINT ck_inventory_recorded_by
+        CHECK (
+            btrim(recorded_by) <> ''
             )
 );
 
