@@ -4,6 +4,7 @@ CREATE TABLE booking
 (
     id                  BIGINT GENERATED ALWAYS AS IDENTITY,
     asset_id            BIGINT      NOT NULL,
+    workshop_id         BIGINT      NOT NULL,
     bay_id              BIGINT      NOT NULL,
     technician_id       BIGINT      NOT NULL,
     slot                TSTZRANGE   NOT NULL,
@@ -18,6 +19,11 @@ CREATE TABLE booking
     CONSTRAINT fk_booking_asset
         FOREIGN KEY (asset_id)
             REFERENCES asset (id)
+            ON DELETE RESTRICT,
+
+    CONSTRAINT fk_workshop_id
+        FOREIGN KEY (workshop_id)
+            REFERENCES workshop (id)
             ON DELETE RESTRICT,
 
     CONSTRAINT fk_booking_bay
@@ -116,15 +122,15 @@ ALTER TABLE booking
         status IN ('HELD', 'CONFIRMED')
     );
 
-ALTER TABLE breakdown_request
-    ADD COLUMN resulting_booking_id BIGINT;
+-- The link between a breakdown and its booking is stored ONCE, on
+-- booking.breakdown_request_id. A mirrored breakdown_request.resulting_booking_id
+-- would duplicate the same fact and allow the two sides to disagree, so it is
+-- deliberately not created.
+--
+-- A breakdown may be re-booked after a cancellation, so uniqueness is enforced
+-- only over bookings that are still live.
+CREATE UNIQUE INDEX uk_booking_active_breakdown
+    ON booking (breakdown_request_id)
+    WHERE breakdown_request_id IS NOT NULL
+      AND status IN ('HELD', 'CONFIRMED', 'COMPLETED');
 
-ALTER TABLE breakdown_request
-    ADD CONSTRAINT uk_breakdown_resulting_booking
-        UNIQUE (resulting_booking_id);
-
-ALTER TABLE breakdown_request
-    ADD CONSTRAINT fk_breakdown_resulting_booking
-        FOREIGN KEY (resulting_booking_id)
-            REFERENCES booking (id)
-            ON DELETE RESTRICT;

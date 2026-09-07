@@ -17,4 +17,6 @@ public interface WorkshopRepository
     List<Workshop> findByDepot(Depot depot);
 
     List<Workshop> findByIsActiveTrue();
+
+    
 }
