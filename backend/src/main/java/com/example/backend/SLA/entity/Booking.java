@@ -82,7 +82,7 @@ public class Booking {
 
     @OneToOne(fetch = FetchType.LAZY, optional = false) 
     //@JoinColumn(name = "breakdown_request_id", nullable = false)
-    @JoinColumn(name = "id", nullable = false)
+    @JoinColumn(name = "breakdown_request_id", nullable = false)
     private BreakdownRequest breakdownRequest;
 
     @Column(name = "status", nullable = false, length = 30)
