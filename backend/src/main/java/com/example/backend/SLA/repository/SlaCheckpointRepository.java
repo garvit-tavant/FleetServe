@@ -43,9 +43,9 @@ public interface SlaCheckpointRepository extends JpaRepository<SlaCheckpoint , L
     //we want the priority wise compliance report like which request have breached from the one which has not been completed!!
     @Query("""
         SELECT sc.breakdownRequest.slaPolicy.priority AS priority,
-        COUNT(br.id) AS evaluatedCases,
-        (COUNT(br.id) - SUM(CASE WHEN sc.responseBreach = true THEN 1 ELSE 0 END)) AS compliantCases,
-        ((COUNT(br.id) - SUM(CASE WHEN sc.responseBreach = true THEN 1 ELSE 0 END)) * 100.0 / COUNT(br.id)) AS compliancePercent
+        COUNT(sc.breakdownRequest.id) AS evaluatedCases,
+        (COUNT(sc.breakdownRequest.id) - SUM(CASE WHEN sc.responseBreach = true THEN 1 ELSE 0 END)) AS compliantCases,
+        ((COUNT(sc.breakdownRequest.id) - SUM(CASE WHEN sc.responseBreach = true THEN 1 ELSE 0 END)) * 100.0 / COUNT(sc.breakdownRequest.id)) AS compliancePercent
         FROM SlaCheckpoint sc
         WHERE sc.breakdownRequest.status = 'COMPLETED'
         GROUP BY sc.breakdownRequest.slaPolicy.priority

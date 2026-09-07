@@ -59,7 +59,7 @@ public class BreakdownRequest {
     @JoinColumn(name = "sla_policy_id", nullable = false)
     private SlaPolicy slaPolicy;
 
-    @OneToOne(mappedBy = "BreakdownRequest", fetch = FetchType.LAZY, optional = true) // 1 to 0/1 mapping
+    @OneToOne(mappedBy = "breakdownRequest", fetch = FetchType.LAZY, optional = true) // 1 to 0/1 mapping
     private Booking booking;
 
     // getters and setters
