@@ -6,25 +6,54 @@ import java.util.Objects;
 /**
  * One certification a technician holds, valid over a closed date range.
  *
- * <p>{@code validTo} of {@code null} means open-ended. Validity is inclusive at
- * both ends, matching the rule agreed for scheduling:
- * {@code validFrom <= date && (validTo == null || validTo >= date)}.
+ * validTo == null means open-ended.
  */
-public record SkillCertification(String skillCode, LocalDate validFrom, LocalDate validTo) {
+public record SkillCertification(
+        String skillCode,
+        LocalDate validFrom,
+        LocalDate validTo
+) {
 
     public SkillCertification {
-        Objects.requireNonNull(skillCode, "skillCode");
-        Objects.requireNonNull(validFrom, "validFrom");
+        Objects.requireNonNull(
+                skillCode,
+                "skillCode"
+        );
+
+        Objects.requireNonNull(
+                validFrom,
+                "validFrom"
+        );
+
+        if (skillCode.isBlank()) {
+            throw new IllegalArgumentException(
+                    "skillCode must not be blank"
+            );
+        }
+
+        if (validTo != null
+                && validTo.isBefore(validFrom)) {
+
+            throw new IllegalArgumentException(
+                    "validTo must not be before validFrom"
+            );
+        }
     }
 
-    public boolean coversDate(LocalDate date) {
+    public boolean coversDate(
+            LocalDate date
+    ) {
         if (date.isBefore(validFrom)) {
             return false;
         }
-        return validTo == null || !date.isAfter(validTo);
+
+        return validTo == null
+                || !date.isAfter(validTo);
     }
 
-    public boolean isFor(String requiredSkill) {
+    public boolean isFor(
+            String requiredSkill
+    ) {
         return skillCode.equals(requiredSkill);
     }
 }

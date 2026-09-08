@@ -43,6 +43,12 @@ public final class FeasibleSlotEngine {
     }
 
     public static List<FeasibleSlot> findSlots(SlotSearchRequest request) {
+
+        java.util.Objects.requireNonNull(
+            request,
+            "request"
+        );
+        
         List<FeasibleSlot> results = new ArrayList<>();
         if (request.maxResults() == 0) {
             return results;

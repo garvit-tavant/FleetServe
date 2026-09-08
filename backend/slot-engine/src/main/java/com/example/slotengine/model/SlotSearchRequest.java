@@ -3,15 +3,6 @@ package com.example.slotengine.model;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * The complete input to a slot search.
- *
- * <p>Everything the engine needs is passed in, which is what keeps the engine a
- * pure function: no repository, no clock, no I/O.
- *
- * <p>{@code requiredCapability} or {@code requiredSkill} may be null, meaning
- * the job places no constraint on that axis.
- */
 public record SlotSearchRequest(
         int durationMinutes,
         String requiredSkill,
@@ -21,23 +12,102 @@ public record SlotSearchRequest(
         WorkingCalendar workingCalendar,
         List<ExistingBooking> existingBookings,
         SearchHorizon searchHorizon,
-        int maxResults) {
+        int maxResults
+) {
 
     public SlotSearchRequest {
+
         if (durationMinutes <= 0) {
             throw new IllegalArgumentException(
-                    "durationMinutes must be positive: " + durationMinutes);
+                    "durationMinutes must be positive: "
+                            + durationMinutes
+            );
         }
+
+        /*
+         * FleetServe rule:
+         *
+         * All durations must be multiples
+         * of 15 minutes.
+         */
+        if (durationMinutes % 15 != 0) {
+            throw new IllegalArgumentException(
+                    "durationMinutes must be a multiple of 15"
+            );
+        }
+
         if (maxResults < 0) {
             throw new IllegalArgumentException(
-                    "maxResults must not be negative: " + maxResults);
+                    "maxResults must not be negative: "
+                            + maxResults
+            );
         }
-        Objects.requireNonNull(workingCalendar, "workingCalendar");
-        Objects.requireNonNull(searchHorizon, "searchHorizon");
 
-        candidateBays = candidateBays == null ? List.of() : List.copyOf(candidateBays);
+        Objects.requireNonNull(
+                workingCalendar,
+                "workingCalendar"
+        );
+
+        Objects.requireNonNull(
+                searchHorizon,
+                "searchHorizon"
+        );
+
+        candidateBays =
+                candidateBays == null
+                        ? List.of()
+                        : List.copyOf(candidateBays);
+
         candidateTechnicians =
-                candidateTechnicians == null ? List.of() : List.copyOf(candidateTechnicians);
-        existingBookings = existingBookings == null ? List.of() : List.copyOf(existingBookings);
+                candidateTechnicians == null
+                        ? List.of()
+                        : List.copyOf(candidateTechnicians);
+
+        existingBookings =
+                existingBookings == null
+                        ? List.of()
+                        : List.copyOf(existingBookings);
+
+        validateUniqueBayIds(
+                candidateBays
+        );
+
+        validateUniqueTechnicianIds(
+                candidateTechnicians
+        );
+    }
+
+    private static void validateUniqueBayIds(
+            List<BayCandidate> bays
+    ) {
+        long uniqueCount =
+                bays.stream()
+                        .map(BayCandidate::bayId)
+                        .distinct()
+                        .count();
+
+        if (uniqueCount != bays.size()) {
+            throw new IllegalArgumentException(
+                    "candidateBays contains duplicate bay IDs"
+            );
+        }
+    }
+
+    private static void validateUniqueTechnicianIds(
+            List<TechnicianCandidate> technicians
+    ) {
+        long uniqueCount =
+                technicians.stream()
+                        .map(
+                                TechnicianCandidate::technicianId
+                        )
+                        .distinct()
+                        .count();
+
+        if (uniqueCount != technicians.size()) {
+            throw new IllegalArgumentException(
+                    "candidateTechnicians contains duplicate technician IDs"
+            );
+        }
     }
 }
