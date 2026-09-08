@@ -19,6 +19,12 @@ public class DueMaintenanceResponse {
 
     private BigDecimal nextDueKm;
 
+    private BigDecimal currentOdometerKm;
+
+    private BigDecimal kmRemaining;
+
+    private Integer daysRemaining;
+
     private DueStatus dueStatus;
 
     // getters setters
@@ -77,5 +83,29 @@ public class DueMaintenanceResponse {
 
     public void setDueStatus(DueStatus dueStatus) {
         this.dueStatus = dueStatus;
+    }
+
+    public BigDecimal getCurrentOdometerKm() {
+        return currentOdometerKm;
+    }
+
+    public void setCurrentOdometerKm(BigDecimal currentOdometerKm) {
+        this.currentOdometerKm = currentOdometerKm;
+    }
+
+    public BigDecimal getKmRemaining() {
+        return kmRemaining;
+    }
+
+    public void setKmRemaining(BigDecimal kmRemaining) {
+        this.kmRemaining = kmRemaining;
+    }
+
+    public Integer getDaysRemaining() {
+        return daysRemaining;
+    }
+
+    public void setDaysRemaining(Integer daysRemaining) {
+        this.daysRemaining = daysRemaining;
     }
 }

@@ -11,51 +11,75 @@ import java.util.List;
 
 import com.example.backend.SLA.dto.SlaComplianceReport;
 import com.example.backend.SLA.entity.SlaCheckpoint;
-
-import jakarta.transaction.Transactional;
+import com.example.backend.SLA.status.BreakdownStatus;
 
 @Repository
-public interface SlaCheckpointRepository extends JpaRepository<SlaCheckpoint , Long> {
-
-
-    @Query("select c.responseBreach from SlaCheckpoint c where c.breakdownRequestId = :breakdownId")
-    Boolean responseBreachfindbyID(@Param("breakdownId") long breakdownID);
-
-    @Query("select c.resolutionBreach from SlaCheckpoint c where c.breakdownRequestId = :breakdownId")
-    Boolean resolutionBreachfindbyID(@Param("breakdownId") long breadkdownID);
-
-    @Query("select c.respondedAt from SlaCheckpoint c where c.breakdownRequestId = :breakdownId")
-    OffsetDateTime respondedatbyID(@Param("breakdownId") Long breakdownID);
-
-    @Query("select c.resolvedAt from SlaCheckpoint c where c.breakdownRequestId = :breakdownId")
-    OffsetDateTime resolutionByID(@Param("breakdownId") Long breakdownID);
+public interface SlaCheckpointRepository extends JpaRepository<SlaCheckpoint, Long> {
 
     @Modifying
-    @Transactional
-    @Query ("update SlaCheckpoint c set c.responseBreach = true where c.breakdownRequestId = :breakdownId")
-    void updateResponseBreach(@Param("breakdownId") Long breakdownId);
-
-    @Modifying
-    @Transactional
-    @Query ("update SlaCheckpoint c set c.resolutionBreach = true where c.breakdownRequestId = :breakdownId")
-    void updateResolutionBreach(@Param("breakdownId") Long breakdownId);
-
-    //we want the priority wise compliance report like which request have breached from the one which has not been completed!!
     @Query("""
-        SELECT sc.breakdownRequest.slaPolicy.priority AS priority,
-        COUNT(sc.breakdownRequest.id) AS evaluatedCases,
-        (COUNT(sc.breakdownRequest.id) - SUM(CASE WHEN sc.responseBreach = true THEN 1 ELSE 0 END)) AS compliantCases,
-        ((COUNT(sc.breakdownRequest.id) - SUM(CASE WHEN sc.responseBreach = true THEN 1 ELSE 0 END)) * 100.0 / COUNT(sc.breakdownRequest.id)) AS compliancePercent
-        FROM SlaCheckpoint sc
-        WHERE sc.breakdownRequest.status = 'COMPLETED'
-        GROUP BY sc.breakdownRequest.slaPolicy.priority
-        ORDER BY sc.breakdownRequest.slaPolicy.priority
-        """)
-    List<SlaComplianceReport> findSlaComplianceMetrics();
+            update SlaCheckpoint c
+               set c.responseBreach = :breached
+             where c.breakdownRequestId = :breakdownId
+               and (c.responseBreach is null or c.responseBreach <> :breached)
+            """)
+    int updateResponseBreach(
+            @Param("breakdownId") Long breakdownId,
+            @Param("breached") boolean breached);
 
+    @Modifying
+    @Query("""
+            update SlaCheckpoint c
+               set c.resolutionBreach = :breached
+             where c.breakdownRequestId = :breakdownId
+               and (c.resolutionBreach is null or c.resolutionBreach <> :breached)
+            """)
+    int updateResolutionBreach(
+            @Param("breakdownId") Long breakdownId,
+            @Param("breached") boolean breached);
 
+    @Modifying
+    @Query("""
+            update SlaCheckpoint c
+               set c.respondedAt = :respondedAt
+             where c.breakdownRequestId = :breakdownId
+               and c.respondedAt is null
+            """)
+    int recordFirstResponse(
+            @Param("breakdownId") Long breakdownId,
+            @Param("respondedAt") OffsetDateTime respondedAt);
 
+    /**
+     * Service-level compliance percentage by priority (US-4.2).
+     *
+     * <p>Aggregated in SQL rather than by looping in Java, which the
+     * specification treats as an automatic fail for this story. A case counts as
+     * compliant only when neither clock breached.
+     *
+     * <p>Scoped to RESOLVED, the terminal success state the schema actually
+     * defines. Cancelled breakdowns are excluded because they were never worked.
+     */
+    @Query("""
+            select new com.example.backend.SLA.dto.SlaComplianceReport(
+                b.priority,
+                count(c.breakdownRequestId),
+                sum(case when coalesce(c.responseBreach, false) = false
+                          and coalesce(c.resolutionBreach, false) = false
+                         then 1L else 0L end),
+                (sum(case when coalesce(c.responseBreach, false) = false
+                           and coalesce(c.resolutionBreach, false) = false
+                          then 1L else 0L end) * 100.0)
+                    / count(c.breakdownRequestId))
+            from SlaCheckpoint c
+            join c.breakdownRequest b
+            where b.status = :resolvedStatus
+            group by b.priority
+            order by b.priority
+            """)
+    List<SlaComplianceReport> findSlaComplianceMetrics(
+            @Param("resolvedStatus") BreakdownStatus resolvedStatus);
 
-
-
+    default List<SlaComplianceReport> findSlaComplianceMetrics() {
+        return findSlaComplianceMetrics(BreakdownStatus.RESOLVED);
+    }
 }

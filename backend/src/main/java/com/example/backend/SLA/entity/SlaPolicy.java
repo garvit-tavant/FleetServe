@@ -33,7 +33,8 @@ public class SlaPolicy {
     private Long id;
 
     @Column(name="priority", nullable = false)
-    private String priority;
+    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+    private com.example.backend.SLA.status.BreakdownPriority priority;
 
     @Column(name="response_target_minutes", nullable = false)
     private Integer responseTargetMinutes;
@@ -60,11 +61,11 @@ public class SlaPolicy {
         this.id = id;
     }
 
-    public String getPriority() {
+    public com.example.backend.SLA.status.BreakdownPriority getPriority() {
         return priority;
     }
 
-    public void setPriority(String priority) {
+    public void setPriority(com.example.backend.SLA.status.BreakdownPriority priority) {
         this.priority = priority;
     }
 

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example</groupId>
+    <artifactId>fleetserve</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>FleetServe</name>
+    <description>
+        Aggregator so a clean clone builds everything in one command:
+
+            mvnw.cmd install
+
+        The slot engine is listed first because the application depends on it.
+        Aggregation only; each module keeps its own parent, so the application
+        still inherits from spring-boot-starter-parent and the slot engine
+        still inherits from nothing.
+    </description>
+
+    <modules>
+        <module>backend/slot-engine</module>
+        <module>backend</module>
+    </modules>
+
+</project>

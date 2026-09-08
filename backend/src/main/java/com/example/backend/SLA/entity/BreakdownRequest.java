@@ -2,6 +2,8 @@ package com.example.backend.SLA.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,6 +14,9 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 import java.time.OffsetDateTime;
+
+import com.example.backend.SLA.status.BreakdownPriority;
+import com.example.backend.SLA.status.BreakdownStatus;
 
 @Entity
 @Table(name = "breakdown_request")
@@ -46,13 +51,30 @@ public class BreakdownRequest {
     private OffsetDateTime reportedAt;
 
     @Column(name = "priority", nullable = false, length = 20)
-    private String priority;
+    @Enumerated(EnumType.STRING)
+    private BreakdownPriority priority;
 
     @Column(name = "description", nullable = false, length = 2000)
     private String description;
 
+    /** A breakdown starts life as REPORTED, before triage has looked at it. */
     @Column(name = "status", nullable = false, length = 30)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private BreakdownStatus status = BreakdownStatus.REPORTED;
+
+    /*
+     * What triage decided the job needs. Held on the breakdown so scheduling
+     * reads it from the record rather than from whoever fills in the booking
+     * form, and so the estimate is pinned against later edits to skill.time.
+     */
+    @Column(name = "required_skill_code", length = 50)
+    private String requiredSkillCode;
+
+    @Column(name = "required_capability_code", length = 50)
+    private String requiredCapabilityCode;
+
+    @Column(name = "estimated_duration_minutes")
+    private Integer estimatedDurationMinutes;
 
     // FK resolved as an association instead of a raw id
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -104,11 +126,11 @@ public class BreakdownRequest {
         this.reportedAt = reportedAt;
     }
 
-    public String getPriority() {
+    public BreakdownPriority getPriority() {
         return priority;
     }
 
-    public void setPriority(String priority) {
+    public void setPriority(BreakdownPriority priority) {
         this.priority = priority;
     }
 
@@ -120,11 +142,11 @@ public class BreakdownRequest {
         this.description = description;
     }
 
-    public String getStatus() {
+    public BreakdownStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(BreakdownStatus status) {
         this.status = status;
     }
 
@@ -134,5 +156,29 @@ public class BreakdownRequest {
 
     public void setSlaPolicy(SlaPolicy slaPolicy) {
         this.slaPolicy = slaPolicy;
+    }
+
+    public String getRequiredSkillCode() {
+        return requiredSkillCode;
+    }
+
+    public void setRequiredSkillCode(String requiredSkillCode) {
+        this.requiredSkillCode = requiredSkillCode;
+    }
+
+    public String getRequiredCapabilityCode() {
+        return requiredCapabilityCode;
+    }
+
+    public void setRequiredCapabilityCode(String requiredCapabilityCode) {
+        this.requiredCapabilityCode = requiredCapabilityCode;
+    }
+
+    public Integer getEstimatedDurationMinutes() {
+        return estimatedDurationMinutes;
+    }
+
+    public void setEstimatedDurationMinutes(Integer estimatedDurationMinutes) {
+        this.estimatedDurationMinutes = estimatedDurationMinutes;
     }
 }

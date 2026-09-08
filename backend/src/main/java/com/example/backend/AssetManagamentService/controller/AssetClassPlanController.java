@@ -1,9 +1,12 @@
 package com.example.backend.AssetManagamentService.controller;
 
+import com.example.backend.AssetManagamentService.dto.assetclass.DueSoonWindowRequest;
 import com.example.backend.AssetManagamentService.dto.maintenanceplan.MaintenancePlanResponse;
 import com.example.backend.AssetManagamentService.service.AssetClassPlanService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,12 +37,40 @@ public class AssetClassPlanController {
             @Positive(message="asset class Id must be positive")
             @PathVariable Long assetClassId,
             @Positive(message = "Plan ID must be positive")
-            @PathVariable Long planId
+            @PathVariable Long planId,
+            @Valid @RequestBody(required = false) DueSoonWindowRequest window
     ) {
 
         assetClassPlanService.attachPlanToAssetClass(
                 assetClassId,
-                planId
+                planId,
+                window
+        );
+
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * PUT /api/asset-classes/{assetClassId}/plans/{planId}/due-soon-window
+     *
+     * Sets the DUE_SOON warning windows for this pairing. These are the
+     * thresholds the due list uses, held as data rather than as constants, and
+     * they can differ per asset class for the same plan.
+     */
+    @PutMapping("/{assetClassId}/plans/{planId}/due-soon-window")
+    @PreAuthorize("hasAnyRole('FLEET_ADMINISTRATOR','MAINTENANCE_PLANNER')")
+    public ResponseEntity<Void> updateDueSoonWindow(
+            @Positive(message = "asset class Id must be positive")
+            @PathVariable Long assetClassId,
+            @Positive(message = "Plan ID must be positive")
+            @PathVariable Long planId,
+            @Valid @RequestBody DueSoonWindowRequest window
+    ) {
+
+        assetClassPlanService.updateDueSoonWindow(
+                assetClassId,
+                planId,
+                window
         );
 
         return ResponseEntity.noContent().build();

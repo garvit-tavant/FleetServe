@@ -1,40 +1,90 @@
 package com.example.backend.SLA.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
+import com.example.backend.SLA.dto.SlaEvaluationRow;
 import com.example.backend.SLA.entity.BreakdownRequest;
+import com.example.backend.SLA.status.BreakdownStatus;
 
 @Repository
-public interface BreakdownRequestRepository extends JpaRepository<BreakdownRequest,Long>{
+public interface BreakdownRequestRepository extends JpaRepository<BreakdownRequest, Long> {
 
-    // ans: none of the methods below matched a Spring Data derived-query keyword
-    // (names like "responsetimebyid" don't resolve to any property path), so they
-    // would all throw QueryCreationException at startup. Added explicit @Query for
-    // each, matching what the pre-existing comment already specified.
+    /**
+     * Breakdowns whose clocks are still running.
+     *
+     * <p>Every join is a LEFT JOIN on purpose. A breakdown that has been reported
+     * but not yet booked has no booking and therefore no workshop, and that is
+     * precisely the population the response clock exists to police; an inner
+     * join would silently drop it. The checkpoint row may also not exist yet.
+     *
+     * <p>The status filter uses the vocabulary the schema actually permits
+     * (REPORTED, TRIAGED, BOOKED, IN_PROGRESS, RESOLVED, CANCELLED).
+     * <p>The status filter is passed as a parameter rather than written as a
+     * literal, because {@code status} is an {@code @Enumerated} field and a bare
+     * string literal would not compare against it.
+     */
+    @Query("""
+            select new com.example.backend.SLA.dto.SlaEvaluationRow(
+                b.id,
+                b.priority,
+                b.reportedAt,
+                w.id,
+                p.responseTargetMinutes,
+                p.resolutionTargetMinutes,
+                p.calendarBasis,
+                c.respondedAt,
+                c.resolvedAt,
+                c.responseBreach,
+                c.resolutionBreach)
+            from BreakdownRequest b
+            join b.slaPolicy p
+            left join b.booking bk
+            left join bk.workshop w
+            left join SlaCheckpoint c on c.breakdownRequestId = b.id
+            where b.status not in :terminalStatuses
+            """)
+    List<SlaEvaluationRow> findOpenForEvaluation(
+            @Param("terminalStatuses") Collection<BreakdownStatus> terminalStatuses);
 
-    @Query("select b.slaPolicy.responseTargetMinutes from BreakdownRequest b where b.id = :breakdownId")
-    long responsetimebyid(@Param("breakdownId") long breakdownID);
+    default List<SlaEvaluationRow> findOpenForEvaluation() {
+        return findOpenForEvaluation(BreakdownStatus.terminalStatuses());
+    }
 
-    @Query("select b.slaPolicy.resolutionTargetMinutes from BreakdownRequest b where b.id = :breakdownId")
-    long resolutiontimebyid(@Param("breakdownId") long breakdownID);
+    /** Single-breakdown variant of {@link #findOpenForEvaluation()}. */
+    @Query("""
+            select new com.example.backend.SLA.dto.SlaEvaluationRow(
+                b.id,
+                b.priority,
+                b.reportedAt,
+                w.id,
+                p.responseTargetMinutes,
+                p.resolutionTargetMinutes,
+                p.calendarBasis,
+                c.respondedAt,
+                c.resolvedAt,
+                c.responseBreach,
+                c.resolutionBreach)
+            from BreakdownRequest b
+            join b.slaPolicy p
+            left join b.booking bk
+            left join bk.workshop w
+            left join SlaCheckpoint c on c.breakdownRequestId = b.id
+            where b.id = :breakdownId
+            """)
+    Optional<SlaEvaluationRow> findForEvaluation(@Param("breakdownId") long breakdownId);
 
-    // A breakdown may not have a booking yet (booked only after triage), so this
-    // can legitimately return null before then - callers must handle that.
-    @Query("select b.booking.workshop.id from BreakdownRequest b where b.id = :breakdownId")
-    Long workshopIDfromid(@Param("breakdownId") long breadkdownID);
+    /** Breakdowns in a given state, most recently reported first. */
+    Page<BreakdownRequest> findByStatusOrderByReportedAtDesc(
+            BreakdownStatus status, Pageable pageable);
 
-    @Query("select b.reportedAt from BreakdownRequest b where b.id = :breakdownId")
-    OffsetDateTime requestraisedtimebyid(@Param("breakdownId") long breakdownID);
-
-    @Query("select b.priority from BreakdownRequest b where b.id = :breakdownId")
-    String prioritybyid(@Param("breakdownId") long breakdownID);
-
-    @Query("select b.id, b.booking.id from BreakdownRequest b where b.status not in ('COMPLETED', 'CANCELED')")
-    List<Long[]> requestsnothandleded();
+    Page<BreakdownRequest> findAllByOrderByReportedAtDesc(Pageable pageable);
 }

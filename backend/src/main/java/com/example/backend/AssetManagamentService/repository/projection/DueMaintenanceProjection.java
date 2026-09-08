@@ -17,5 +17,13 @@ public interface DueMaintenanceProjection {
 
     BigDecimal getNextDueKm();
 
+    BigDecimal getCurrentOdometerKm();
+
+    /** Negative once the distance threshold has been passed. Null for time-only plans. */
+    BigDecimal getKmRemaining();
+
+    /** Negative once the time threshold has been passed. Null for distance-only plans. */
+    Integer getDaysRemaining();
+
     String getDueStatus();
 }

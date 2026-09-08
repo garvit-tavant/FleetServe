@@ -40,6 +40,14 @@ public class AwaitingRaised {
     @Column(name = "resolved_at")
     private OffsetDateTime resolvedAt = null; // default is null according to db migration script
 
+    /*
+     * AWAITING_PARTS or DEPOT_UNREACHABLE. Both suspend the service-level clock
+     * identically; the reason is kept so the two causes stay separable in
+     * reporting. See docs/open-questions.md entry 12.
+     */
+    @Column(name = "pause_reason", nullable = false, length = 30)
+    private String pauseReason;
+
     //getters and setters
 
     public Long getId() {
@@ -72,5 +80,13 @@ public class AwaitingRaised {
 
     public void setResolvedAt(OffsetDateTime resolvedAt) {
         this.resolvedAt = resolvedAt;
+    }
+
+    public String getPauseReason() {
+        return pauseReason;
+    }
+
+    public void setPauseReason(String pauseReason) {
+        this.pauseReason = pauseReason;
     }
 }

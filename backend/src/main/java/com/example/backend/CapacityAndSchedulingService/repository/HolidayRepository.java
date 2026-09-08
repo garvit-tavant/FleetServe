@@ -28,12 +28,19 @@ public interface HolidayRepository
             LocalDate holidayDate
     );
 
-    // ans: fixed - now filters to holidays that are either specific to this workshop
-    // OR global (workshop IS NULL), matching the pattern used by the sibling
-    // findByWorkshop_Id.../findByWorkshopIsNull... methods above. Previously this
-    // counted holidays across every workshop, which would overcount once more than
-    // one workshop exists.
-    @Query("select count(h) from Holiday h where (h.workshop.id = :workshopId or h.workshop is null) and h.holidayDate > :start and h.holidayDate < :end")
-    long countHoldidayinbetween(@Param("workshopId") long workshopId, @Param("start") LocalDate start, @Param("end") LocalDate end);
-    
+    // Returns workshop-specific and global (workshop IS NULL) holiday dates in
+    // the window. The join must be a LEFT JOIN: an implicit path join would be
+    // an inner join and would silently drop every global holiday.
+    @Query("""
+            select h.holidayDate
+            from Holiday h
+            left join h.workshop w
+            where (w.id = :workshopId or w is null)
+              and h.holidayDate between :start and :end
+            """)
+    List<LocalDate> findHolidayDatesBetween(
+            @Param("workshopId") long workshopId,
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end);
+
 }
