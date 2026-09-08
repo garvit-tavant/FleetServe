@@ -1,4 +1,4 @@
-package com.example.backend.SLA.service;
+package com.example.backend.SLA.service.impl;
 
 import java.util.List;
 
@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.SLA.dto.SlaComplianceReport;
-import com.example.backend.SLA.repository.BreakdownRequestRepository;
+import com.example.backend.ExecutionService.repository.WorkOrderRepository;
 import com.example.backend.SLA.repository.SlaCheckpointRepository;
 
 /**
@@ -23,12 +23,12 @@ import com.example.backend.SLA.repository.SlaCheckpointRepository;
 @Transactional(readOnly = true)
 public class SlaService {
     private final SlaCalculator slaCalculator;
-    private final BreakdownRequestRepository breakdownRequestRepository;
+    private final WorkOrderRepository workOrderRepository;
     private final SlaCheckpointRepository slaCheckpointRepository;
 
-    public SlaService(SlaCalculator slaCalculator, BreakdownRequestRepository breakdownRequestRepository, SlaCheckpointRepository slaCheckpointRepository) {
+    public SlaService(SlaCalculator slaCalculator, WorkOrderRepository workOrderRepository, SlaCheckpointRepository slaCheckpointRepository) {
         this.slaCalculator = slaCalculator;
-        this.breakdownRequestRepository = breakdownRequestRepository;
+        this.workOrderRepository = workOrderRepository;
         this.slaCheckpointRepository = slaCheckpointRepository;
     }
 
@@ -39,21 +39,28 @@ public class SlaService {
      * it updates all the sla_checkpoints where breakdown_request has not been RESOLVED OR CANCELED
      */
     public void updateSlaStatus() {
-        // id[0] => breakdownRequestId
-        // id[1] => bookingId
-        List<Long[]> IDs = breakdownRequestRepository.requestsnothandleded();
-        for (Long[] id : IDs) {
-           slaCalculator.isResponseBreach(id[0]);
-           slaCalculator.isResolutionBreach(id[0], id[1]);    
+        // Only evaluate SLA clocks for bookings that currently have an
+        // active WorkOrder (SCHEDULED / IN_PROGRESS / AWAITING_PARTS). This
+        // avoids wasting work on resolved/cancelled bookings and matches the
+        // user's requirement.
+    java.util.List<Long> activeBookingIds = workOrderRepository.findActiveBookingIds();
+        for (Long bookingId : activeBookingIds) {
+            if (bookingId == null) continue;
+            slaCalculator.isResponseBreach(bookingId);
+            slaCalculator.isResolutionBreach(bookingId);
         }
 
-        
     }
 
     public List<SlaComplianceReport> SlaCompliance() {
+        updateSlaStatus();
         return slaCheckpointRepository.findSlaComplianceMetrics();
     }
 
+    // time is calculated from the work order timestamps 
+    public Double MeanTimeToRepair(){
+        return null;
+    }
 
 }
 

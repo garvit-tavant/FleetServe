@@ -37,4 +37,11 @@ public interface BreakdownRequestRepository extends JpaRepository<BreakdownReque
 
     @Query("select b.id, b.booking.id from BreakdownRequest b where b.status not in ('COMPLETED', 'CANCELED')")
     List<Long[]> requestsnothandleded();
+
+    // Used by WorkOrderServiceImpl to resolve which breakdown_request (and
+    // therefore which sla_checkpoint) a work order's booking belongs to, since
+    // a WorkOrder only stores bookingId. Returns null for preventive bookings
+    // (no linked breakdown request).
+    @Query("select b.id from BreakdownRequest b where b.booking.id = :bookingId")
+    Long findIdByBookingId(@Param("bookingId") Long bookingId);
 }

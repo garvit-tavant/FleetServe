@@ -1,4 +1,4 @@
-package com.example.backend.SLA.service;
+package com.example.backend.SLA.service.impl;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -7,6 +7,7 @@ import java.time.temporal.ChronoUnit;
 
 import com.example.backend.CapacityAndSchedulingService.repository.HolidayRepository;
 import com.example.backend.CapacityAndSchedulingService.repository.WorkingCalendarRepository;
+import com.example.backend.SLA.service.SlaTimeCalculationStrategy;
 
 /**
  * Working-hours SLA time calculation strategy.
@@ -70,6 +71,10 @@ public class WorkingHoursSlaTimeCalculationStrategy implements SlaTimeCalculatio
         return time;
     }
 
+    /*
+        what if the end time is after shift ends so we need to clamp that
+        or similarly what if the start time is before shift starts
+     */
     private long clampMinutes(long minutes, long max) {
         return Math.max(0, Math.min(minutes, max));
     }

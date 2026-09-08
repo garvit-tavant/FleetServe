@@ -13,6 +13,8 @@ import jakarta.persistence.Table;
 
 import java.time.OffsetDateTime;
 
+import com.example.backend.ExecutionService.entity.Booking;
+
 @Entity
 @Table(name = "breakdown_request")
 public class BreakdownRequest {
