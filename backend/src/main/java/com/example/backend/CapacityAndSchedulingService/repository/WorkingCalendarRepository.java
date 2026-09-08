@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,4 +40,6 @@ public interface WorkingCalendarRepository
     // ans: same fix as above, for close time.
     @Query("select wc.closeTime from WorkingCalendar wc where wc.workshop.id = :workshopId order by wc.dayOfWeek asc")
     LocalTime findbyclosetimebyworkshopID(@Param("workshopId") long workshopID);
+
+    List<WorkingCalendar> findByWorkshop_IdOrderByDayOfWeekAsc(Long workshopId);
 }

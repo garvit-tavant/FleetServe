@@ -3,6 +3,7 @@ package com.example.backend.ExecutionService.repository;
 import com.example.backend.ExecutionService.entity.WorkOrder;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,8 +21,16 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
    // of letting the DB throw a constraint-violation exception.
    boolean existsByBooking_Id(Long bookingId);
 
-   @Query("select w.booking.id from WorkOrder w where w.status in ('SCHEDULED','IN_PROGRESS','AWAITING_PARTS')")
-   java.util.List<Long> findActiveBookingIds();
+   @Query("""
+        select w.booking.id
+        from WorkOrder w
+        where w.status in (
+            com.example.backend.ExecutionService.status.WorkOrderStatus.SCHEDULED,
+            com.example.backend.ExecutionService.status.WorkOrderStatus.IN_PROGRESS,
+            com.example.backend.ExecutionService.status.WorkOrderStatus.AWAITING_PARTS
+        )
+        """)
+   List<Long> findActiveBookingIds();
 
    // mean time to repair calcualtion 
    // 

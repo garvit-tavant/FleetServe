@@ -18,5 +18,5 @@ public interface WorkshopRepository
 
     List<Workshop> findByIsActiveTrue();
 
-    
+    List<Workshop> findByDepot_IdAndIsActiveTrueOrderByIdAsc(Long depotId);
 }

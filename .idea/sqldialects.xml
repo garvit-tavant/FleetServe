@@ -2,6 +2,7 @@
 <project version="4">
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V10__required_indexes.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V13_alter_in_booking_and_workorder.sql" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V1__identity_access.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V2__workshop_resources.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V4__maintenance_policy_and_assets.sql" dialect="GenericSQL" />

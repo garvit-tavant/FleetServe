@@ -1,15 +1,8 @@
 package com.example.backend.ExecutionService.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
+import com.example.backend.ExecutionService.status.BookingKind;
+import com.example.backend.ExecutionService.status.BookingStatus;
+import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -75,8 +68,9 @@ public class Booking {
     private org.springframework.data.domain.Range<OffsetDateTime> slot;
 
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "kind", nullable = false, length = 20)
-    private String kind;
+    private BookingKind kind;
 
 
     // need to map the maintenance plan
@@ -88,9 +82,11 @@ public class Booking {
     @JoinColumn(name = "breakdown_request_id")
     private BreakdownRequest breakdownRequest;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
-    private String status;
+    private BookingStatus status;
 
+    @Version
     @Column(name = "version", nullable = false)
     private Long version;
 
@@ -147,14 +143,6 @@ public class Booking {
         this.slot = slot;
     }
 
-    public String getKind() {
-        return kind;
-    }
-
-    public void setKind(String kind) {
-        this.kind = kind;
-    }
-
     public Long getMaintenancePlanId() {
         return maintenancePlanId;
     }
@@ -171,14 +159,6 @@ public class Booking {
         this.breakdownRequest = breakdownRequest;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public Long getVersion() {
         return version;
     }
@@ -193,5 +173,21 @@ public class Booking {
 
     public void setWorkOrder(WorkOrder workOrder) {
         this.workOrder = workOrder;
+    }
+
+    public BookingKind getKind() {
+        return kind;
+    }
+
+    public void setKind(BookingKind kind) {
+        this.kind = kind;
+    }
+
+    public BookingStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(BookingStatus status) {
+        this.status = status;
     }
 }

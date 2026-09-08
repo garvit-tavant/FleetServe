@@ -1,16 +1,17 @@
 package com.example.backend.AssetManagamentService.service;
 
-import com.example.backend.AssetManagamentService.dto.duemaintenance.DueMaintenanceResponse;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
-import java.math.BigDecimal;
+import com.example.backend.AssetManagamentService.dto.duemaintenance.DueMaintenanceResponse;
+import com.example.backend.ExecutionService.dto.PreventiveBookingResponse;
+
+import java.util.List;
 
 public interface DueMaintenanceService {
 
-    Page<DueMaintenanceResponse> getDueMaintenance(
-            BigDecimal distanceSoonThreshold,
-            Integer timeSoonThresholdDays,
-            Pageable pageable
+    List<DueMaintenanceResponse> getDueMaintenanceAssets();
+
+    PreventiveBookingResponse createPreventiveBooking(
+            Long assetId,
+            Long maintenancePlanId
     );
 }
