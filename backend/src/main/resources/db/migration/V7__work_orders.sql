@@ -68,7 +68,7 @@ CREATE TABLE work_order
     completed_at        TIMESTAMPTZ,
     odometer_at_service NUMERIC(12,3),
     total_cost          NUMERIC(12,2) NOT NULL DEFAULT 0,
-    idempotency_key     VARCHAR(100)  NOT NULL,
+    idempotency_key     VARCHAR(100),
     version             BIGINT        NOT NULL DEFAULT 0,
 
     CONSTRAINT pk_work_order PRIMARY KEY (id),
@@ -129,6 +129,7 @@ CREATE TABLE work_order
                 started_at IS NOT NULL
                     AND completed_at IS NOT NULL
                     AND odometer_at_service IS NOT NULL
+                    AND idempotency_key IS NOT NULL
                 )
             ),
 

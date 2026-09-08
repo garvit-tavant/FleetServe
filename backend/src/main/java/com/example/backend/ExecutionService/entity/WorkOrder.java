@@ -8,10 +8,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.JoinColumn;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +30,7 @@ public class WorkOrder {
     completed_at        TIMESTAMPTZ,
     odometer_at_service NUMERIC(12,3),
     total_cost          NUMERIC(12,2) NOT NULL DEFAULT 0,
-    idempotency_key     VARCHAR(100)  NOT NULL,
+    idempotency_key     VARCHAR(100),
     version             BIGINT        NOT NULL DEFAULT 0,
     */
 
@@ -39,8 +41,9 @@ public class WorkOrder {
     @Column(name = "work_order_number", nullable = false)
     private String workOrderNumber;
 
-    @Column(name = "booking_id", nullable = false)
-    private Long bookingId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booking_id", nullable = false)
+    private Booking booking;
 
     @Column(name = "asset_id", nullable = false)
     private Long assetId;
@@ -49,10 +52,10 @@ public class WorkOrder {
     private String status;
 
     @Column(name = "started_at", columnDefinition = "TIME WITH TIME ZONE")
-    private Instant startedAt;
+    private OffsetDateTime startedAt;
 
     @Column(name = "completed_at", columnDefinition = "TIME WITH TIME ZONE")
-    private Instant completedAt;
+    private OffsetDateTime completedAt;
 
     @Column(name = "odometer_at_service", precision = 12, scale = 3)
     private BigDecimal odometerAtService;
@@ -60,7 +63,7 @@ public class WorkOrder {
     @Column(name = "total_cost", nullable = false , precision = 12, scale = 2)
     private BigDecimal totalCost;
 
-    @Column(name = "idempotency_key", nullable = false)
+    @Column(name = "idempotency_key")
     private String idempotencyKey;
 
     @Column(name = "version", nullable = false)
@@ -90,12 +93,12 @@ public class WorkOrder {
         this.workOrderNumber = workOrderNumber;
     }
 
-    public Long getBookingId() {
-        return bookingId;
+    public Booking getBooking() {
+        return booking;
     }
 
-    public void setBookingId(Long bookingId) {
-        this.bookingId = bookingId;
+    public void setBooking(Booking booking) {
+        this.booking = booking;
     }
 
     public Long getAssetId() {
@@ -114,19 +117,19 @@ public class WorkOrder {
         this.status = status;
     }
 
-    public Instant getStartedAt() {
+    public OffsetDateTime getStartedAt() {
         return startedAt;
     }
 
-    public void setStartedAt(Instant startedAt) {
+    public void setStartedAt(OffsetDateTime startedAt) {
         this.startedAt = startedAt;
     }
 
-    public Instant getCompletedAt() {
+    public OffsetDateTime getCompletedAt() {
         return completedAt;
     }
 
-    public void setCompletedAt(Instant completedAt) {
+    public void setCompletedAt(OffsetDateTime completedAt) {
         this.completedAt = completedAt;
     }
 

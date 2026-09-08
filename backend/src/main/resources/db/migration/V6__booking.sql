@@ -134,3 +134,50 @@ CREATE UNIQUE INDEX uk_booking_active_breakdown
     WHERE breakdown_request_id IS NOT NULL
       AND status IN ('HELD', 'CONFIRMED', 'COMPLETED');
 
+
+-- Keyed on booking_id, NOT breakdown_request_id: a repair job can originate
+-- either from a breakdown request (corrective) or from a maintenance plan
+-- (preventive), and both need the same clock tracking - responded/resolved
+-- timestamps and awaiting-parts pauses - so that MTTR covers all repairs
+-- rather than only breakdowns.
+--
+-- Response/resolution *breach* flags only ever apply to corrective bookings,
+-- since SLA targets live on breakdown_request.sla_policy_id; for preventive
+-- bookings they simply stay FALSE. The breakdown request (and therefore the
+-- SLA policy) remains reachable via booking.breakdown_request_id when needed.
+CREATE TABLE sla_checkpoint
+(
+    booking_id          BIGINT       NOT NULL,
+    responded_at        TIMESTAMPTZ  DEFAULT NULL,
+    resolved_at         TIMESTAMPTZ  DEFAULT NULL,
+    response_breach     BOOLEAN      DEFAULT FALSE,
+    resolution_breach   BOOLEAN      DEFAULT FALSE,
+
+    -- Precomputed running total of all *closed* awaiting-parts/approval pauses,
+    -- in minutes (per whatever calendar basis was applied at close time).
+    -- Avoids re-summing a full pause-history table on every SLA check.
+    accumulated_awaiting_minutes BIGINT NOT NULL DEFAULT 0,
+
+    -- Start time of the currently open awaiting pause, or NULL if the job is
+    -- not currently paused. Only one pause can be open at a time; raising
+    -- again while already open is rejected by the application layer.
+    last_awaiting_raised_at TIMESTAMPTZ DEFAULT NULL,
+
+    CONSTRAINT pk_sla_checkpoint PRIMARY KEY (booking_id),
+
+    CONSTRAINT fk_sla_checkpoint_booking
+        FOREIGN KEY (booking_id)
+            REFERENCES booking (id)
+            ON DELETE RESTRICT,
+
+    CONSTRAINT ck_sla_checkpoint_responded_before_resolved
+        CHECK
+            (
+                resolved_at IS NULL
+                OR (responded_at IS NOT NULL AND resolved_at > responded_at)
+            ),
+
+    CONSTRAINT ck_sla_checkpoint_accumulated_awaiting_non_negative
+        CHECK (accumulated_awaiting_minutes >= 0)
+);
+

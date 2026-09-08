@@ -102,46 +102,6 @@ CREATE TABLE breakdown_request
         CHECK (btrim(description) <> '')
 );
 
-
-CREATE TABLE sla_checkpoint
-(
-  
-    breakdown_request_id BIGINT       NOT NULL,
-    responded_at        TIMESTAMPTZ  DEFAULT NULL,
-    resolved_at         TIMESTAMPTZ  DEFAULT NULL,
-    response_breach     BOOLEAN DEFAULT FALSE,
-    resolution_breach    BOOLEAN DEFAULT FALSE,
-
-    CONSTRAINT pk_sla_checkpoint PRIMARY KEY (breakdown_request_id),
-
-    CONSTRAINT fk_sla_checkpoint_breakdown_request
-        FOREIGN KEY (breakdown_request_id)
-            REFERENCES breakdown_request (id)
-            ON DELETE RESTRICT,
-
-
-    CONSTRAINT ck_sla_checkpoint_responded_before_resolved
-        CHECK
-            (
-                resolved_at IS NULL
-                OR (responded_at IS NOT NULL AND resolved_at > responded_at)
-            )
-);
-
-
-CREATE TABLE awaiting_raised
-(   id                  BIGINT GENERATED ALWAYS AS IDENTITY,
-    breakdown_request_id BIGINT       NOT NULL,
-    raised_at         TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    resolved_at         TIMESTAMPTZ  DEFAULT NULL,
-
-    CONSTRAINT pk_awaiting_raised PRIMARY KEY (id),
-
-    CONSTRAINT fk_awaiting_raised_breakdown_request
-        FOREIGN KEY (breakdown_request_id)
-            REFERENCES breakdown_request (id)
-            ON DELETE RESTRICT,
-
-    CONSTRAINT ck_awaiting_raised_resolved_after_raised
-        CHECK (resolved_at IS NULL OR resolved_at > raised_at)
-);
+-- sla_checkpoint is defined in V6__booking.sql, not here: it is keyed on
+-- booking_id (every booking - preventive or corrective - gets one), and the
+-- booking table does not exist until V6.
