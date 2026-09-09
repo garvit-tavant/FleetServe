@@ -2,12 +2,17 @@ package com.example.backend.SLA.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import java.time.LocalDate;
+
+import com.example.backend.SLA.dto.BreakdownPriority;
+import com.example.backend.SLA.dto.SlaBasis;
 
 // ans: removed unused jakarta.annotation.Generated import (wrong type, unrelated to JPA)
 // added jakarta.persistence.GeneratedValue, GenerationType, and Column which were missing,
@@ -32,17 +37,19 @@ public class SlaPolicy {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="priority", nullable = false)
-    private String priority;
+    @Column(name="priority", nullable = false, length = 20)
+    @Enumerated(EnumType.STRING)
+    private BreakdownPriority priority;
 
     @Column(name="response_target_minutes", nullable = false)
-    private Integer responseTargetMinutes;
+    private Long responseTargetMinutes;
 
     @Column(name="resolution_target_minutes", nullable = false)
-    private Integer resolutionTargetMinutes;
+    private Long resolutionTargetMinutes;
 
     @Column(name="calendar_basis", nullable = false)
-    private String calendarBasis;
+    @Enumerated(EnumType.STRING)
+    private SlaBasis calendarBasis;
 
     @Column(name="effective_from", nullable = false)
     private LocalDate effectiveFrom;
@@ -60,35 +67,35 @@ public class SlaPolicy {
         this.id = id;
     }
 
-    public String getPriority() {
+    public BreakdownPriority getPriority() {
         return priority;
     }
 
-    public void setPriority(String priority) {
+    public void setPriority(BreakdownPriority priority) {
         this.priority = priority;
     }
 
-    public Integer getResponseTargetMinutes() {
+    public Long getResponseTargetMinutes() {
         return responseTargetMinutes;
     }
 
-    public void setResponseTargetMinutes(Integer responseTargetMinutes) {
+    public void setResponseTargetMinutes(Long responseTargetMinutes) {
         this.responseTargetMinutes = responseTargetMinutes;
     }
 
-    public Integer getResolutionTargetMinutes() {
+    public Long getResolutionTargetMinutes() {
         return resolutionTargetMinutes;
     }
 
-    public void setResolutionTargetMinutes(Integer resolutionTargetMinutes) {
+    public void setResolutionTargetMinutes(Long resolutionTargetMinutes) {
         this.resolutionTargetMinutes = resolutionTargetMinutes;
     }
 
-    public String getCalendarBasis() {
+    public SlaBasis getCalendarBasis() {
         return calendarBasis;
     }
 
-    public void setCalendarBasis(String calendarBasis) {
+    public void setCalendarBasis(SlaBasis calendarBasis) {
         this.calendarBasis = calendarBasis;
     }
 

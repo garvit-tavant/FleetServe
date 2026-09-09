@@ -8,7 +8,9 @@ import org.springframework.stereotype.Repository;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import com.example.backend.SLA.dto.BreakdownPriority;
 import com.example.backend.SLA.entity.BreakdownRequest;
+import com.example.backend.SLA.entity.SlaPolicy;
 
 @Repository
 public interface BreakdownRequestRepository extends JpaRepository<BreakdownRequest,Long>{
@@ -44,4 +46,11 @@ public interface BreakdownRequestRepository extends JpaRepository<BreakdownReque
     // (no linked breakdown request).
     @Query("select b.id from BreakdownRequest b where b.booking.id = :bookingId")
     Long findIdByBookingId(@Param("bookingId") Long bookingId);
+
+
+    @Query("SELECT br.slaPolicy FROM BreakdownRequest br WHERE br.id = :id")
+    SlaPolicy pinnedSlaPolicyById(@Param("id") Long id);
+
+    @Query("SELECT br.priority FROM BreakdownRequest br WHERE br.id = :id")
+    BreakdownPriority priorityById(@Param("id") Long id);
 }

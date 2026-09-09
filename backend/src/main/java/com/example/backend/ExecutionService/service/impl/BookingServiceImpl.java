@@ -7,6 +7,7 @@ import com.example.backend.ExecutionService.service.WorkOrderService;
 import com.example.backend.SLA.entity.BreakdownRequest;
 import com.example.backend.SLA.repository.BreakdownRequestRepository;
 import com.example.backend.SLA.service.SlaCheckpointService;
+import com.example.backend.SLA.dto.BreakdownStatus;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,7 +69,7 @@ public class BookingServiceImpl implements BookingService {
             // Booking.breakdownRequest has no cascade, so the status change
             // needs its own explicit save - saving the Booking alone would
             // not persist this.
-            breakdownRequest.setStatus("BOOKED");
+            breakdownRequest.setStatus(BreakdownStatus.BOOKED);
             breakdownRequestRepository.save(breakdownRequest);
         }
 

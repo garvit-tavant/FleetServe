@@ -2,6 +2,8 @@ package com.example.backend.SLA.service;
 
 import java.time.OffsetDateTime;
 
+import com.example.backend.SLA.dto.SlaBasis;
+
 /**
  * Strategy interface for computing elapsed SLA time between two timestamps.
  * Supports multiple basis calculations (working-hours, calendar-hours, etc.).
@@ -29,4 +31,5 @@ public interface SlaTimeCalculationStrategy {
      */
     long calculateElapsedTime(OffsetDateTime start, OffsetDateTime end, long workshopID);
 
+    SlaBasis supportedBasis();
 }

@@ -1,9 +1,12 @@
 package com.example.backend.SLA.service.impl;
 
+import org.springframework.stereotype.Service;
+
 import com.example.backend.SLA.entity.BreakdownRequest;
 import com.example.backend.SLA.repository.BreakdownRequestRepository;
 import com.example.backend.SLA.service.BreakdownRequestService;
 
+@Service 
 public class BreakdownRequestImpl implements BreakdownRequestService {
 
     private final BreakdownRequestRepository breakdownRequestRepository;
@@ -14,6 +17,7 @@ public class BreakdownRequestImpl implements BreakdownRequestService {
 
     @Override
     public void createBreakdownRequest(BreakdownRequest request) {
+        // need to implement this correctly
         breakdownRequestRepository.save(request);
         System.out.println("Breakdown request created: " + request);
     }

@@ -1,4 +1,4 @@
-﻿package com.example.backend.SLA.repository;
+package com.example.backend.SLA.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -24,6 +24,8 @@ import jakarta.transaction.Transactional;
  */
 @Repository
 public interface SlaCheckpointRepository extends JpaRepository<SlaCheckpoint, Long> {
+
+
 
     @Query("select c.responseBreach from SlaCheckpoint c where c.booking.id = :bookingId")
     Boolean responseBreachByBookingId(@Param("bookingId") Long bookingId);
@@ -78,6 +80,19 @@ public interface SlaCheckpointRepository extends JpaRepository<SlaCheckpoint, Lo
     @Transactional
     @Query("update SlaCheckpoint c set c.accumulatedAwaitingMinutes = c.accumulatedAwaitingMinutes + :minutes, c.lastAwaitingRaisedAt = null where c.booking.id = :bookingId")
     void resolveAwaiting(@Param("bookingId") Long bookingId, @Param("minutes") long minutes);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+        UPDATE SlaCheckpoint sc
+        SET sc.accumulatedAwaitingMinutes = sc.accumulatedAwaitingMinutes + :minutes,
+            sc.lastAwaitingRaisedAt = NULL
+        WHERE sc.booking.id = :bookingId
+          AND sc.lastAwaitingRaisedAt = :expectedOpenSince
+        """)
+int resolveAwaitingIfOpen(@Param("bookingId") Long bookingId,
+                          @Param("expectedOpenSince") OffsetDateTime expectedOpenSince,
+                          @Param("minutes") long minutes);
+
 
     /**
      * Priority-wise SLA compliance. Restricted to corrective jobs

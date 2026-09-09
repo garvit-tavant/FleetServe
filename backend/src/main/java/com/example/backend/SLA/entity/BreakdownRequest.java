@@ -2,6 +2,8 @@ package com.example.backend.SLA.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,7 +15,12 @@ import jakarta.persistence.Table;
 
 import java.time.OffsetDateTime;
 
+import com.example.backend.AssetManagamentService.entity.Asset;
+import com.example.backend.CapacityAndSchedulingService.entity.Depot;
 import com.example.backend.ExecutionService.entity.Booking;
+import com.example.backend.SLA.dto.BreakdownPriority;
+import com.example.backend.SLA.dto.BreakdownStatus;
+import com.example.backend.SecurityService.entity.AppUser;
 
 @Entity
 @Table(name = "breakdown_request")
@@ -35,26 +42,31 @@ public class BreakdownRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "asset_id", nullable = false)
-    private Long assetId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "asset_id", nullable = false)
+    private Asset asset;
 
-    @Column(name = "depot_id", nullable = false)
-    private Long depotId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "depot_id", nullable = false)
+    private Depot depot;
 
-    @Column(name = "reported_by_id", nullable = false)
-    private Long reportedById;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "reported_by_id", nullable = false)
+    private AppUser reportedBy;
 
     @Column(name = "reported_at", nullable = false)
     private OffsetDateTime reportedAt;
 
     @Column(name = "priority", nullable = false, length = 20)
-    private String priority;
+    @Enumerated(EnumType.STRING)
+    private BreakdownPriority priority;
 
     @Column(name = "description", nullable = false, length = 2000)
     private String description;
 
     @Column(name = "status", nullable = false, length = 30)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private BreakdownStatus status;
 
     // FK resolved as an association instead of a raw id
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -74,28 +86,28 @@ public class BreakdownRequest {
         this.id = id;
     }
 
-    public Long getAssetId() {
-        return assetId;
+    public Asset getAsset() {
+        return asset;
     }
 
-    public void setAssetId(Long assetId) {
-        this.assetId = assetId;
+    public void setAsset(Asset asset) {
+        this.asset = asset;
     }
 
-    public Long getDepotId() {
-        return depotId;
+    public Depot getDepot() {
+        return depot;
     }
 
-    public void setDepotId(Long depotId) {
-        this.depotId = depotId;
+    public void setDepot(Depot depot) {
+        this.depot = depot;
     }
 
-    public Long getReportedById() {
-        return reportedById;
+    public AppUser getReportedBy() {
+        return reportedBy;
     }
 
-    public void setReportedById(Long reportedById) {
-        this.reportedById = reportedById;
+    public void setReportedBy(AppUser reportedBy) {
+        this.reportedBy = reportedBy;
     }
 
     public OffsetDateTime getReportedAt() {
@@ -106,11 +118,11 @@ public class BreakdownRequest {
         this.reportedAt = reportedAt;
     }
 
-    public String getPriority() {
+    public BreakdownPriority getPriority() {
         return priority;
     }
 
-    public void setPriority(String priority) {
+    public void setPriority(BreakdownPriority priority) {
         this.priority = priority;
     }
 
@@ -122,11 +134,11 @@ public class BreakdownRequest {
         this.description = description;
     }
 
-    public String getStatus() {
+    public BreakdownStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(BreakdownStatus status) {
         this.status = status;
     }
 
@@ -137,4 +149,13 @@ public class BreakdownRequest {
     public void setSlaPolicy(SlaPolicy slaPolicy) {
         this.slaPolicy = slaPolicy;
     }
+
+    public Booking getBooking() {
+        return booking;
+    }
+
+    public void setBooking(Booking booking) {
+        this.booking = booking;
+    }
 }
+

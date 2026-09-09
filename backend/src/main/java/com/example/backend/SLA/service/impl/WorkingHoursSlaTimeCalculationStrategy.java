@@ -5,8 +5,11 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 
+import org.springframework.stereotype.Service;
+
 import com.example.backend.CapacityAndSchedulingService.repository.HolidayRepository;
 import com.example.backend.CapacityAndSchedulingService.repository.WorkingCalendarRepository;
+import com.example.backend.SLA.dto.SlaBasis;
 import com.example.backend.SLA.service.SlaTimeCalculationStrategy;
 
 /**
@@ -19,6 +22,7 @@ import com.example.backend.SLA.service.SlaTimeCalculationStrategy;
  *
  * This is the recommended basis per INV-7 specification and calendar_basis=WORKING_TIME policy.
  */
+@Service 
 public class WorkingHoursSlaTimeCalculationStrategy implements SlaTimeCalculationStrategy {
 
     private final WorkingCalendarRepository workingCalendarRepository;
@@ -29,6 +33,11 @@ public class WorkingHoursSlaTimeCalculationStrategy implements SlaTimeCalculatio
             HolidayRepository holidayRepository) {
         this.workingCalendarRepository = workingCalendarRepository;
         this.holidayRepository = holidayRepository;
+    }
+
+     @Override
+    public SlaBasis supportedBasis() {
+        return SlaBasis.WORKING_TIME;
     }
 
     @Override

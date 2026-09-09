@@ -57,6 +57,12 @@ public class GlobalExceptionHandler {
         );
     }
 
+    public static class ConflictException extends RuntimeException {
+        public ConflictException(String m) {
+            super(m);
+        }
+    }
+
     @ExceptionHandler(DuplicateUsernameException.class)
     public ResponseEntity<ApiErrorResponse> handleDuplicateUsername(
             DuplicateUsernameException exception,

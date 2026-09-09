@@ -3,6 +3,9 @@ package com.example.backend.SLA.service.impl;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 
+import org.springframework.stereotype.Service;
+
+import com.example.backend.SLA.dto.SlaBasis;
 import com.example.backend.SLA.service.SlaTimeCalculationStrategy;
 
 /**
@@ -15,6 +18,7 @@ import com.example.backend.SLA.service.SlaTimeCalculationStrategy;
  * Used when SlaPolicy.calendarBasis = CALENDAR_TIME.
  * Note: This strategy ignores the workshopID parameter since calendar time is 24/7.
  */
+@Service 
 public class CalendarHoursSlaTimeCalculationStrategy implements SlaTimeCalculationStrategy {
 
     @Override
@@ -23,4 +27,8 @@ public class CalendarHoursSlaTimeCalculationStrategy implements SlaTimeCalculati
         return ChronoUnit.MINUTES.between(start, end);
     }
 
+     @Override
+    public SlaBasis supportedBasis() {
+        return SlaBasis.CALENDAR_TIME;
+    }
 }
