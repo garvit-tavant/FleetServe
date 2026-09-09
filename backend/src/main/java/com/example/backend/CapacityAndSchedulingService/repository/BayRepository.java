@@ -18,6 +18,10 @@ public interface BayRepository
             Long workshopId
     );
 
+    List<Bay> findByWorkshop_IdOrderByIdAsc(
+            Long workshopId
+    );
+
     Optional<Bay> findByBayCode(
             String bayCode
     );

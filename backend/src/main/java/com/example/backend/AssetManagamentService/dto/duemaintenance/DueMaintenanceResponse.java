@@ -1,9 +1,7 @@
 package com.example.backend.AssetManagamentService.dto.duemaintenance;
 
-import com.example.backend.AssetManagamentService.status.DueStatus;
-
-import java.time.LocalDate;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public class DueMaintenanceResponse {
 
@@ -11,17 +9,20 @@ public class DueMaintenanceResponse {
 
     private String vin;
 
-    private String assetClassCode;
+    private Long maintenancePlanId;
 
     private String maintenancePlanCode;
 
-    private LocalDate nextDueDate;
+    private BigDecimal currentOdometerKm;
 
     private BigDecimal nextDueKm;
 
-    private DueStatus dueStatus;
+    private LocalDate nextDueDate;
 
-    // getters setters
+    private String dueStatus;
+
+    public DueMaintenanceResponse() {
+    }
 
     public Long getAssetId() {
         return assetId;
@@ -39,12 +40,12 @@ public class DueMaintenanceResponse {
         this.vin = vin;
     }
 
-    public String getAssetClassCode() {
-        return assetClassCode;
+    public Long getMaintenancePlanId() {
+        return maintenancePlanId;
     }
 
-    public void setAssetClassCode(String assetClassCode) {
-        this.assetClassCode = assetClassCode;
+    public void setMaintenancePlanId(Long maintenancePlanId) {
+        this.maintenancePlanId = maintenancePlanId;
     }
 
     public String getMaintenancePlanCode() {
@@ -55,12 +56,12 @@ public class DueMaintenanceResponse {
         this.maintenancePlanCode = maintenancePlanCode;
     }
 
-    public LocalDate getNextDueDate() {
-        return nextDueDate;
+    public BigDecimal getCurrentOdometerKm() {
+        return currentOdometerKm;
     }
 
-    public void setNextDueDate(LocalDate nextDueDate) {
-        this.nextDueDate = nextDueDate;
+    public void setCurrentOdometerKm(BigDecimal currentOdometerKm) {
+        this.currentOdometerKm = currentOdometerKm;
     }
 
     public BigDecimal getNextDueKm() {
@@ -71,11 +72,19 @@ public class DueMaintenanceResponse {
         this.nextDueKm = nextDueKm;
     }
 
-    public DueStatus getDueStatus() {
+    public LocalDate getNextDueDate() {
+        return nextDueDate;
+    }
+
+    public void setNextDueDate(LocalDate nextDueDate) {
+        this.nextDueDate = nextDueDate;
+    }
+
+    public String getDueStatus() {
         return dueStatus;
     }
 
-    public void setDueStatus(DueStatus dueStatus) {
+    public void setDueStatus(String dueStatus) {
         this.dueStatus = dueStatus;
     }
 }

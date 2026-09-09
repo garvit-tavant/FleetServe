@@ -35,5 +35,21 @@ public interface HolidayRepository
     // one workshop exists.
     @Query("select count(h) from Holiday h where (h.workshop.id = :workshopId or h.workshop is null) and h.holidayDate > :start and h.holidayDate < :end")
     long countHoldidayinbetween(@Param("workshopId") long workshopId, @Param("start") LocalDate start, @Param("end") LocalDate end);
-    
+
+    @Query("""
+        SELECT h
+        FROM Holiday h
+        WHERE h.holidayDate >= :startDate
+        AND h.holidayDate < :endDateExclusive
+        AND (
+        h.workshop IS NULL
+        OR h.workshop.id = :workshopId
+        )
+        ORDER BY h.holidayDate
+    """)
+    List<Holiday> findApplicableHolidays(
+@Param("workshopId") Long workshopId,
+@Param("startDate") LocalDate startDate,
+@Param("endDateExclusive") LocalDate endDateExclusive
+    );
 }

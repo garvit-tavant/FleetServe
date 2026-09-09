@@ -24,4 +24,8 @@ public interface TechnicianRepository
     List<Technician> findByWorkshop_IdAndActiveTrue(
             Long workshopId
     );
+
+    List<Technician> findByWorkshop_IdOrderByIdAsc(
+            Long workshopId
+    );
 }

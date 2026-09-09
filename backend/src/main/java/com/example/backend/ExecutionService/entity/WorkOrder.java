@@ -1,16 +1,7 @@
 package com.example.backend.ExecutionService.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.JoinColumn;
+import com.example.backend.ExecutionService.status.WorkOrderStatus;
+import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -48,13 +39,20 @@ public class WorkOrder {
     @Column(name = "asset_id", nullable = false)
     private Long assetId;
 
-    @Column(name = "status", nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 30)
+    private WorkOrderStatus status;
 
-    @Column(name = "started_at", columnDefinition = "TIME WITH TIME ZONE")
+    @Column(
+            name = "started_at",
+            columnDefinition = "TIME WITH TIME ZONE"
+    )
     private OffsetDateTime startedAt;
 
-    @Column(name = "completed_at", columnDefinition = "TIME WITH TIME ZONE")
+    @Column(
+            name = "completed_at",
+            columnDefinition = "TIME WITH TIME ZONE"
+    )
     private OffsetDateTime completedAt;
 
     @Column(name = "odometer_at_service", precision = 12, scale = 3)
@@ -66,6 +64,7 @@ public class WorkOrder {
     @Column(name = "idempotency_key")
     private String idempotencyKey;
 
+    @Version
     @Column(name = "version", nullable = false)
     private Long version;
 
@@ -107,14 +106,6 @@ public class WorkOrder {
 
     public void setAssetId(Long assetId) {
         this.assetId = assetId;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     public OffsetDateTime getStartedAt() {
@@ -165,4 +156,27 @@ public class WorkOrder {
         this.version = version;
     }
 
+    public WorkOrderStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(WorkOrderStatus status) {
+        this.status = status;
+    }
+
+    public List<WorkOrderLabour> getLabourEntries() {
+        return labourEntries;
+    }
+
+    public void setLabourEntries(List<WorkOrderLabour> labourEntries) {
+        this.labourEntries = labourEntries;
+    }
+
+    public List<WorkOrderPart> getPartEntries() {
+        return partEntries;
+    }
+
+    public void setPartEntries(List<WorkOrderPart> partEntries) {
+        this.partEntries = partEntries;
+    }
 }
