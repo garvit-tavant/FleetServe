@@ -1075,8 +1075,8 @@ public class DueMaintenanceServiceImpl
         Booking booking =
                 new Booking();
 
-        booking.setAssetId(
-                asset.getId()
+        booking.setAsset(
+                asset
         );
 
         booking.setWorkshop(
@@ -1152,8 +1152,8 @@ public class DueMaintenanceServiceImpl
                 booking
         );
 
-        workOrder.setAssetId(
-                asset.getId()
+        workOrder.setAsset(
+                asset
         );
 
         workOrder.setStatus(
@@ -1225,7 +1225,7 @@ public class DueMaintenanceServiceImpl
         );
 
         response.setAssetId(
-                booking.getAssetId()
+                booking.getAsset().getId()
         );
 
         response.setMaintenancePlanId(

@@ -5,13 +5,14 @@ import java.util.Collection;
 
 
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
+
 
 
 import com.example.backend.SecurityService.dto.AppUserPrincipal;
 
-@Service
-public class AppUserDetailsService {
+@Component 
+public class AppUserDetailsServiceFactory {
     
 
     public AppUserPrincipal loadUserByUsername(String username , Collection<? extends GrantedAuthority> authorities) {

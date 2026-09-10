@@ -1,6 +1,8 @@
 package com.example.backend.ExecutionService.repository;
 
+import com.example.backend.ExecutionService.dto.CompletedWork;
 import com.example.backend.ExecutionService.entity.WorkOrder;
+
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -32,7 +34,18 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
         """)
    List<Long> findActiveBookingIds();
 
-   // mean time to repair calcualtion 
-   // 
+   // Row for US-4.2 MTTR aggregation. WorkOrder.assetId is a raw column
+   // (no @ManyToOne association), so Asset/AssetClass are joined explicitly
+   // via an ad-hoc JPQL join instead of entity-graph traversal.
+   @Query("""
+            select new com.example.backend.ExecutionService.dto.CompletedWork(
+                w.booking.id, w.booking.workshop.id, w.asset.assetClass.id, w.asset.assetClass.code,
+                w.startedAt, w.completedAt)
+            from WorkOrder w
+            where w.status = com.example.backend.ExecutionService.status.WorkOrderStatus.COMPLETED
+              and w.startedAt is not null
+              and w.completedAt is not null
+           """)
+   List<CompletedWork> findCompletedWork();
 
 }

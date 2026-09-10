@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 public interface HolidayRepository
         extends JpaRepository<Holiday, Long> {
@@ -51,5 +52,30 @@ public interface HolidayRepository
 @Param("workshopId") Long workshopId,
 @Param("startDate") LocalDate startDate,
 @Param("endDateExclusive") LocalDate endDateExclusive
+    );
+
+    /**
+     * Bulk variant of findApplicableHolidays for batch callers that need
+     * holidays for MANY workshops across one shared date range at once (e.g.
+     * SlaService.MeanTimeToRepair aggregating over many completed work
+     * orders) — one query instead of one per workshop, avoiding N+1.
+     * Global holidays (workshop IS NULL) are always included regardless of
+     * which workshopIds are passed.
+     */
+    @Query("""
+        SELECT h
+        FROM Holiday h
+        WHERE h.holidayDate >= :startDate
+        AND h.holidayDate < :endDateExclusive
+        AND (
+        h.workshop IS NULL
+        OR h.workshop.id IN :workshopIds
+        )
+        ORDER BY h.holidayDate
+    """)
+    List<Holiday> findApplicableHolidaysForWorkshops(
+            @Param("workshopIds") Set<Long> workshopIds,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDateExclusive") LocalDate endDateExclusive
     );
 }

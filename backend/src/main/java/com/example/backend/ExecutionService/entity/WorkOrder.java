@@ -1,5 +1,6 @@
 package com.example.backend.ExecutionService.entity;
 
+import com.example.backend.AssetManagamentService.entity.Asset;
 import com.example.backend.ExecutionService.status.WorkOrderStatus;
 import jakarta.persistence.*;
 
@@ -36,8 +37,10 @@ public class WorkOrder {
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
 
-    @Column(name = "asset_id", nullable = false)
-    private Long assetId;
+    @ManyToOne( fetch = FetchType.LAZY, optional = false)
+    @JoinColumn( name = "asset_id",  nullable = false)
+    private Asset asset;
+
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
@@ -100,12 +103,12 @@ public class WorkOrder {
         this.booking = booking;
     }
 
-    public Long getAssetId() {
-        return assetId;
+    public Asset getAsset() {
+        return asset;
     }
 
-    public void setAssetId(Long assetId) {
-        this.assetId = assetId;
+    public void setAsset(Asset asset) {
+        this.asset = asset;
     }
 
     public OffsetDateTime getStartedAt() {

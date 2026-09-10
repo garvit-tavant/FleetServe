@@ -5,6 +5,7 @@ import com.example.backend.ExecutionService.entity.WorkOrder;
 import com.example.backend.ExecutionService.repository.BookingRepository;
 import com.example.backend.ExecutionService.repository.WorkOrderRepository;
 import com.example.backend.ExecutionService.service.WorkOrderService;
+import com.example.backend.ExecutionService.status.WorkOrderStatus;
 import com.example.backend.SLA.entity.BreakdownRequest;
 import com.example.backend.SLA.repository.SlaCheckpointRepository;
 import com.example.backend.SLA.service.SlaCheckpointService;
@@ -74,8 +75,8 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 
         WorkOrder workOrder = new WorkOrder();
         workOrder.setBooking(booking);
-        workOrder.setAssetId(booking.getAssetId());
-        workOrder.setStatus("SCHEDULED");
+        workOrder.setAsset(booking.getAsset());
+        workOrder.setStatus(WorkOrderStatus.SCHEDULED);
         workOrder.setTotalCost(BigDecimal.ZERO);
         workOrder.setVersion(0L);
         workOrder.setWorkOrderNumber(generateWorkOrderNumber());
@@ -94,7 +95,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
                 .orElseThrow(() -> new IllegalArgumentException("Work order not found: " + workOrderId));
 
         OffsetDateTime now = OffsetDateTime.now();
-        workOrder.setStatus("IN_PROGRESS");
+        workOrder.setStatus(WorkOrderStatus.IN_PROGRESS);
         workOrder.setStartedAt(now);
         workOrderRepository.save(workOrder);
 
@@ -107,7 +108,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
         WorkOrder workOrder = workOrderRepository.findById(workOrderId)
                 .orElseThrow(() -> new IllegalArgumentException("Work order not found: " + workOrderId));
 
-        workOrder.setStatus("AWAITING_PARTS");
+        workOrder.setStatus(WorkOrderStatus.AWAITING_PARTS);
         workOrderRepository.save(workOrder);
 
         slaCheckpointService.recordAwaitingParts(bookingIdFor(workOrder), OffsetDateTime.now());
@@ -121,7 +122,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
         WorkOrder workOrder = workOrderRepository.findById(workOrderId)
                 .orElseThrow(() -> new IllegalArgumentException("Work order not found: " + workOrderId));
 
-        workOrder.setStatus("IN_PROGRESS");
+        workOrder.setStatus(WorkOrderStatus.IN_PROGRESS);
         workOrderRepository.save(workOrder);
 
         slaCheckpointService.recordAwaitingPartsResolved(bookingIdFor(workOrder), OffsetDateTime.now());
@@ -166,7 +167,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
         WorkOrder workOrder = workOrderRepository.findById(workOrderId)
                 .orElseThrow(() -> new IllegalArgumentException("Work order not found: " + workOrderId));
 
-        if (enforceIdempotency && "COMPLETED".equals(workOrder.getStatus())) {
+        if (enforceIdempotency && WorkOrderStatus.COMPLETED.equals(workOrder.getStatus())) {
             boolean isReplay = requestIdempotencyKey != null
                     && requestIdempotencyKey.equals(workOrder.getIdempotencyKey());
             if (isReplay) {
@@ -177,7 +178,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
         }
 
         OffsetDateTime when = completedAt != null ? completedAt : OffsetDateTime.now();
-        workOrder.setStatus("COMPLETED");
+        workOrder.setStatus(WorkOrderStatus.COMPLETED);
         workOrder.setCompletedAt(when);
         if (requestIdempotencyKey != null) {
             // Overwrites the creation-time placeholder (see createForBooking) with

@@ -10,6 +10,8 @@ import java.time.OffsetDateTime;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import com.example.backend.AssetManagamentService.entity.Asset;
+
 // Range mapping removed to avoid runtime dependency issues; store as String
 //import io.hypersistence.utils.hibernate.type.range.spring.PostgreSQLSpringRangeType;
 
@@ -39,9 +41,9 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "asset_id", nullable = false)
-    private Long assetId;
-
+    @ManyToOne( fetch = FetchType.LAZY, optional = false)
+    @JoinColumn( name = "asset_id",  nullable = false)
+    private Asset asset;
    
    
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -103,12 +105,12 @@ public class Booking {
         this.id = id;
     }
 
-    public Long getAssetId() {
-        return assetId;
+    public Asset getAsset() {
+        return this.asset;
     }
 
-    public void setAssetId(Long assetId) {
-        this.assetId = assetId;
+    public void setAsset(Asset asset) {
+        this.asset = asset;
     }
 
     public Workshop getWorkshop() {

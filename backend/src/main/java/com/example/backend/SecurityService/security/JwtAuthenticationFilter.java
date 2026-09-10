@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.backend.SecurityService.dto.AppUserPrincipal;
-import com.example.backend.SecurityService.service.impl.AppUserDetailsService;
+import com.example.backend.SecurityService.service.impl.AppUserDetailsServiceFactory;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,11 +24,11 @@ import java.util.stream.Collectors;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     
     private final JwtService jwtService;
-    private final AppUserDetailsService appUserDetailsService;
+    private final AppUserDetailsServiceFactory appUserDetailsServiceFactory;
 
-    public JwtAuthenticationFilter(JwtService jwtService , AppUserDetailsService appUserDetailsService) {
+    public JwtAuthenticationFilter(JwtService jwtService , AppUserDetailsServiceFactory appUserDetailsServiceFactory) {
         this.jwtService = jwtService;
-        this.appUserDetailsService = appUserDetailsService;
+        this.appUserDetailsServiceFactory = appUserDetailsServiceFactory;
     }
 
     @Override
@@ -66,7 +66,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 // authorities.stream().forEach(role -> System.out.println("Role from JWT: " + role.getAuthority()));
                                 // System.out.println("====================");
 
-            AppUserPrincipal principal = appUserDetailsService.loadUserByUsername(username, authorities);
+            AppUserPrincipal principal = appUserDetailsServiceFactory.loadUserByUsername(username, authorities);
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(principal, null, authorities);  
             SecurityContextHolder.getContext().setAuthentication(authToken);
            
