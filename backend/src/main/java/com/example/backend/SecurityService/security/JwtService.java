@@ -71,7 +71,7 @@ public class JwtService {
             return false;
             }
         catch(Exception e){
-            System.err.println("JWT ERROR WHICH NOT RECORDED HAPPEND !!");
+            System.err.println("JWT ERROR WHICH NOT RECORDED HAPPEND !!"+e.getMessage());
             return false;
         }
     

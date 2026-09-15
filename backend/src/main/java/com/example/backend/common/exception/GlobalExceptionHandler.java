@@ -6,6 +6,10 @@ import com.example.backend.AssetManagamentService.exception.DuplicateResourceExc
 import com.example.backend.AssetManagamentService.exception.ResourceNotFoundException;
 import com.example.backend.SecurityService.exception.AuthenticationFailedException;
 import com.example.backend.SecurityService.exception.DuplicateUsernameException;
+<<<<<<< HEAD
+=======
+import org.springframework.security.access.AccessDeniedException;
+>>>>>>> adb7a61ec989339824a9535e6a022e5556b9194d
 import jakarta.persistence.PessimisticLockException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -36,6 +40,45 @@ public class GlobalExceptionHandler {
         return buildResponse(
                 HttpStatus.NOT_FOUND,
                 exception.getMessage(),
+                request.getRequestURI(),
+                null
+        );
+    }
+
+    @ExceptionHandler(AuthenticationFailedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAuthenticationFailed(
+            AuthenticationFailedException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.UNAUTHORIZED,
+                exception.getMessage(),
+                request.getRequestURI(),
+                null
+        );
+    }
+
+    @ExceptionHandler(DuplicateUsernameException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateUsername(
+            DuplicateUsernameException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                exception.getMessage(),
+                request.getRequestURI(),
+                null
+        );
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAccessDenied(
+            AccessDeniedException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.FORBIDDEN,
+                "You do not have permission to perform this action",
                 request.getRequestURI(),
                 null
         );
@@ -87,7 +130,7 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
         return buildResponse(
-                HttpStatus.UNPROCESSABLE_ENTITY,
+                HttpStatus.resolve(422),
                 exception.getMessage(),
                 request.getRequestURI(),
                 null

@@ -17,6 +17,8 @@ public class AssetResponse {
 
     private Long homeDepotId;
 
+    private String homeDepotCode;
+
     private LocalDate acquisitionDate;
 
     private BigDecimal acquisitionOdometerKm;
@@ -87,5 +89,13 @@ public class AssetResponse {
 
     public void setStatus(AssetStatus status) {
         this.status = status;
+    }
+
+    public String getHomeDepotCode() {
+        return homeDepotCode;
+    }
+
+    public void setHomeDepotCode(String homeDepotCode) {
+        this.homeDepotCode = homeDepotCode;
     }
 }

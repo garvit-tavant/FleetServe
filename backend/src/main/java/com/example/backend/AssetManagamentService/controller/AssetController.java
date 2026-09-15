@@ -9,6 +9,7 @@ import com.example.backend.AssetManagamentService.service.AssetService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -30,6 +31,7 @@ public class AssetController {
      * Registers an asset and creates its initial odometer reading.
      */
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")  // only ADMIN can register assets
     public ResponseEntity<AssetResponse> registerAsset(
             @Valid @RequestBody RegisterAssetRequest request
     ) {
@@ -50,6 +52,7 @@ public class AssetController {
      * Returns complete asset details.
      */
     @GetMapping("/{assetId}")
+    @PreAuthorize("hasAnyRole('ADMIN','TECHNICIAN')")  // both roles can read
     public ResponseEntity<AssetResponse> getAsset(
             @PathVariable Long assetId
     ) {

@@ -76,7 +76,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if(!user.getIsActive()){
-            throw new AuthenticationFailedException("User account is inactive");
+            throw new AuthenticationFailedException("User account is inactive"); // checked if user is active
         }
 
         String token = jwtService.generateToken(user.getUsername(), user.getRoles().stream().map(Role::getRoleCode).collect(Collectors.toSet()));

@@ -1,6 +1,7 @@
 package com.example.backend.AssetManagamentService.entity;
 
 import com.example.backend.AssetManagamentService.status.AssetStatus;
+import com.example.backend.CapacityAndSchedulingService.entity.Depot;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -21,8 +22,12 @@ public class Asset {
     @JoinColumn(name = "asset_class_id", nullable = false)
     private AssetClass assetClass;
 
-    @Column(name = "home_depot_id", nullable = false)
-    private Long homeDepotId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "home_depot_id",
+            nullable = false
+    )
+    private Depot homeDepot;
 
     @Column(name = "acquisition_date", nullable = false)
     private LocalDate acquisitionDate;
@@ -57,10 +62,6 @@ public class Asset {
         return assetClass;
     }
 
-    public Long getHomeDepotId() {
-        return homeDepotId;
-    }
-
     public LocalDate getAcquisitionDate() {
         return acquisitionDate;
     }
@@ -89,10 +90,6 @@ public class Asset {
         this.assetClass = assetClass;
     }
 
-    public void setHomeDepotId(Long homeDepotId) {
-        this.homeDepotId = homeDepotId;
-    }
-
     public void setAcquisitionDate(LocalDate acquisitionDate) {
         this.acquisitionDate = acquisitionDate;
     }
@@ -107,5 +104,13 @@ public class Asset {
 
     public void setVersion(Long version) {
         this.version = version;
+    }
+
+    public Depot getHomeDepot() {
+        return homeDepot;
+    }
+
+    public void setHomeDepot(Depot homeDepot) {
+        this.homeDepot = homeDepot;
     }
 }
