@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth-guard';
 import { Login } from './auth/login/login';
 import { Register } from './auth/register/register';
 import { AssetList } from './asset-management/asset-list/asset-list';
@@ -16,15 +17,15 @@ export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'login', component: Login },
   { path: 'register', component: Register },
-  { path: 'dashboard', component: DashboardHome },
-  { path: 'assets', component: AssetList },
-  { path: 'assets/new', component: AssetForm },
-  { path: 'assets/:id', component: AssetDetail },
-  { path: 'due-maintenance', component: DueMaintenanceList },
-  { path: 'workshops', component: WorkshopList },
-  { path: 'bookings', component: SlotCalendar },
-  { path: 'inventory', component: PartList },
-  { path: 'work-orders', component: WorkOrderList },
-  { path: 'breakdowns', component: BreakdownList },
+  { path: 'dashboard', component: DashboardHome, canActivate: [authGuard] },
+  { path: 'assets', component: AssetList, canActivate: [authGuard] },
+  { path: 'assets/new', component: AssetForm, canActivate: [authGuard] },
+  { path: 'assets/:id', component: AssetDetail, canActivate: [authGuard] },
+  { path: 'due-maintenance', component: DueMaintenanceList, canActivate: [authGuard] },
+  { path: 'workshops', component: WorkshopList, canActivate: [authGuard] },
+  { path: 'bookings', component: SlotCalendar, canActivate: [authGuard] },
+  { path: 'inventory', component: PartList, canActivate: [authGuard] },
+  { path: 'work-orders', component: WorkOrderList, canActivate: [authGuard] },
+  { path: 'breakdowns', component: BreakdownList, canActivate: [authGuard] },
   { path: '**', redirectTo: 'dashboard' },
 ];

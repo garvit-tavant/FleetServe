@@ -1,1 +1,60 @@
-<p>register works!</p>
+<div class="min-h-screen flex items-center justify-center bg-gray-100">
+  <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
+    <h1 class="text-2xl font-bold mb-6 text-center">Create Account</h1>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium mb-1">Username</label>
+        <input
+          type="text"
+          formControlName="username"
+          class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        @if (form.get('username')?.invalid && form.get('username')?.touched) {
+          <p class="text-red-500 text-xs mt-1">Username is required</p>
+        }
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-1">Password</label>
+        <input
+          type="password"
+          formControlName="password"
+          class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        @if (form.get('password')?.invalid && form.get('password')?.touched) {
+          <p class="text-red-500 text-xs mt-1">Password must be at least 6 characters</p>
+        }
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-1">Confirm Password</label>
+        <input
+          type="password"
+          formControlName="confirmPassword"
+          class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      @if (errorMessage()) {
+        <p class="text-red-600 text-sm">{{ errorMessage() }}</p>
+      }
+      @if (successMessage()) {
+        <p class="text-green-600 text-sm">{{ successMessage() }}</p>
+      }
+
+      <button
+        type="submit"
+        [disabled]="loading()"
+        class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+      >
+        {{ loading() ? 'Registering...' : 'Register' }}
+      </button>
+    </form>
+
+    <p class="text-sm text-center mt-4">
+      Already have an account?
+      <a routerLink="/login" class="text-blue-600 hover:underline">Login</a>
+    </p>
+  </div>
+</div>
