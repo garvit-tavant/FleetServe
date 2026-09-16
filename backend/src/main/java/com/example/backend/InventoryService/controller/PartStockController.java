@@ -47,7 +47,7 @@ public class PartStockController {
         );
     }
 
-    @GetMapping("/alerts/{workshopId}")
+    @GetMapping("/workshop/{workshopId}/reorder-alerts")
     public List<PartStockResponse> getReorderAlerts(
             @PathVariable Long workshopId
     ) {

@@ -1,5 +1,6 @@
 package com.example.backend.CapacityAndSchedulingService.entity;
 
+import com.example.backend.ExecutionService.entity.Booking;
 import com.example.backend.SecurityService.entity.AppUser;
 import jakarta.persistence.*;
 
@@ -51,6 +52,12 @@ public class Technician {
     )
     private List<TechnicianSkill> technicianSkills =
             new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "technician",
+            fetch = FetchType.LAZY
+    )
+    private List<Booking> bookings = new ArrayList<>();
 
     public Technician() {
     }
@@ -109,5 +116,21 @@ public class Technician {
 
     public Long getVersion() {
         return version;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    public List<Booking> getBookings() {
+        return bookings;
+    }
+
+    public void setBookings(List<Booking> bookings) {
+        this.bookings = bookings;
     }
 }

@@ -1,5 +1,6 @@
 package com.example.backend.CapacityAndSchedulingService.entity;
 
+import com.example.backend.ExecutionService.entity.Booking;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -55,6 +56,12 @@ public class Workshop {
     @OneToMany(mappedBy = "workshop")
     private List<Holiday> holidays =
             new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "workshop",
+            fetch = FetchType.LAZY
+    )
+    private List<Booking> bookings = new ArrayList<>();
 
     public Workshop() {
     }
@@ -132,4 +139,14 @@ public class Workshop {
     public void setHolidays(List<Holiday> holidays) {
         this.holidays = holidays;
     }
+
+    public List<Booking> getBookings() {
+        return bookings;
+    }
+
+    public void setBookings(List<Booking> bookings) {
+        this.bookings = bookings;
+    }
+
+
 }

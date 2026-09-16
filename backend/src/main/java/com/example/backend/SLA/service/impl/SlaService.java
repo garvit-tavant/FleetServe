@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.example.backend.SLA.dto.BreakdownStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,7 +83,7 @@ public class SlaService {
 
     public List<SlaComplianceReport> SlaCompliance() {
         updateSlaStatus();
-        return slaCheckpointRepository.findSlaComplianceMetrics();
+        return slaCheckpointRepository.findSlaComplianceMetrics(BreakdownStatus.RESOLVED);
     }
 
     // time is calculated from the work order timestamps 

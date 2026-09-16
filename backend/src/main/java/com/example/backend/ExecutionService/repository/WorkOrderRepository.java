@@ -3,10 +3,16 @@ package com.example.backend.ExecutionService.repository;
 import com.example.backend.ExecutionService.dto.CompletedWork;
 import com.example.backend.ExecutionService.entity.WorkOrder;
 
-
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
+import com.example.backend.ExecutionService.entity.WorkOrderLabour;
+import com.example.backend.ExecutionService.status.WorkOrderStatus;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -34,12 +40,10 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
         """)
    List<Long> findActiveBookingIds();
 
-   // Row for US-4.2 MTTR aggregation. WorkOrder.assetId is a raw column
-   // (no @ManyToOne association), so Asset/AssetClass are joined explicitly
-   // via an ad-hoc JPQL join instead of entity-graph traversal.
+   
    @Query("""
             select new com.example.backend.ExecutionService.dto.CompletedWork(
-                w.booking.id, w.booking.workshop.id, w.asset.assetClass.id, w.asset.assetClass.code,
+                w.booking.id, w.booking.workshop.id, w.booking.asset.assetClass.id, w.booking.asset.assetClass.code,
                 w.startedAt, w.completedAt)
             from WorkOrder w
             where w.status = com.example.backend.ExecutionService.status.WorkOrderStatus.COMPLETED
@@ -47,5 +51,78 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
               and w.completedAt is not null
            """)
    List<CompletedWork> findCompletedWork();
+
+
+   @Query("""
+        SELECT wo
+        FROM WorkOrder wo
+        JOIN FETCH wo.booking b
+        WHERE b.asset.id = :assetId
+          AND b.maintenancePlan.id = :maintenancePlanId
+          AND b.kind = com.example.backend.ExecutionService.status.BookingKind.PREVENTIVE
+          AND wo.status = com.example.backend.ExecutionService.status.WorkOrderStatus.COMPLETED
+          AND wo.completedAt IS NOT NULL
+          AND wo.odometerAtService IS NOT NULL
+        ORDER BY wo.completedAt DESC, wo.id DESC
+        """)
+   List<WorkOrder> findCompletedPreventiveServices(
+           @Param("assetId") Long assetId,
+           @Param("maintenancePlanId") Long maintenancePlanId,
+           Pageable pageable
+   );
+
+   Optional<WorkOrder> findByBooking_Id(
+           Long bookingId
+   );
+
+   List<WorkOrder> findByStatusIn(
+           List<WorkOrderStatus> statuses
+   );
+
+   long countByStatusIn(
+           List<WorkOrderStatus> statuses
+   );
+
+   @Lock(LockModeType.PESSIMISTIC_WRITE)
+   @Query("""
+        SELECT wo
+        FROM WorkOrder wo
+        JOIN FETCH wo.booking b
+        JOIN FETCH b.technician t
+        JOIN FETCH t.appUser au
+        LEFT JOIN FETCH b.breakdownRequest br
+        WHERE wo.id = :workOrderId
+        """)
+   Optional<WorkOrder> findByIdForTransition(
+           @Param("workOrderId")
+           Long workOrderId);
+
+      Optional<WorkOrder> findByIdempotencyKey(
+              String idempotencyKey);
+
+   @Lock(LockModeType.PESSIMISTIC_WRITE)
+   @Query("""
+        SELECT wo
+        FROM WorkOrder wo
+        JOIN FETCH wo.booking b
+        JOIN FETCH b.technician t
+        JOIN FETCH t.appUser au
+        LEFT JOIN FETCH b.breakdownRequest br
+        WHERE wo.id = :workOrderId
+        """)
+   Optional<WorkOrder> findByIdForStartWork(
+           @Param("workOrderId") Long workOrderId);
+
+      @Query("""
+            SELECT COALESCE(
+                SUM(l.hours * l.rateApplied),
+                0
+            )
+            FROM WorkOrderLabour l
+            WHERE l.workOrder.id = :workOrderId
+            """)
+      BigDecimal calculateTotalLabourCost(
+              @Param("workOrderId")
+              Long workOrderId);
 
 }

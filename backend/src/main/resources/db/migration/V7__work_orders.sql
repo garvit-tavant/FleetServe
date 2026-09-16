@@ -32,7 +32,7 @@ CREATE TABLE booking_history
             'CANCELLED',
             'COMPLETED'
             )
-),
+        ),
 
     CONSTRAINT ck_booking_history_previous_slot
         CHECK
@@ -62,7 +62,6 @@ CREATE TABLE work_order
     id                  BIGINT GENERATED ALWAYS AS IDENTITY,
     work_order_number   VARCHAR(50)   NOT NULL,
     booking_id          BIGINT        NOT NULL,
-    asset_id            BIGINT        NOT NULL,
     status              VARCHAR(30)   NOT NULL DEFAULT 'SCHEDULED',
     started_at          TIMESTAMPTZ,
     completed_at        TIMESTAMPTZ,
@@ -79,11 +78,6 @@ CREATE TABLE work_order
     CONSTRAINT fk_work_order_booking
         FOREIGN KEY (booking_id)
             REFERENCES booking (id)
-            ON DELETE RESTRICT,
-
-    CONSTRAINT fk_work_order_asset
-        FOREIGN KEY (asset_id)
-            REFERENCES asset (id)
             ON DELETE RESTRICT,
 
     CONSTRAINT ck_work_order_status
@@ -129,7 +123,6 @@ CREATE TABLE work_order
                 started_at IS NOT NULL
                     AND completed_at IS NOT NULL
                     AND odometer_at_service IS NOT NULL
-                    AND idempotency_key IS NOT NULL
                 )
             ),
 
@@ -156,6 +149,13 @@ CREATE TABLE work_order_labour
         FOREIGN KEY (technician_id)
             REFERENCES technician (id)
             ON DELETE RESTRICT,
+
+    CONSTRAINT uk_work_order_labour
+        UNIQUE
+            (
+             work_order_id,
+             technician_id
+            ),
 
     CONSTRAINT ck_work_order_labour_hours
         CHECK (hours > 0),

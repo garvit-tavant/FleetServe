@@ -6,9 +6,7 @@ package com.example.backend.SLA.dto;
  */
 public enum BreakdownStatus {
     REPORTED,
-    TRIAGED,
     BOOKED,
-    IN_PROGRESS,
     RESOLVED,
     CANCELLED
 }

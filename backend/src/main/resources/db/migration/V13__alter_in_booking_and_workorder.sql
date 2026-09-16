@@ -17,7 +17,6 @@ ALTER TABLE booking
     ADD CONSTRAINT ck_booking_status
         CHECK (
             status IN (
-                       'HELD',
                        'CONFIRMED',
                        'CANCELLED',
                        'COMPLETED'

@@ -1,54 +1,5 @@
 package com.example.backend.AssetManagamentService.service.impl;
 
-import com.example.backend.AssetManagamentService.dto.duemaintenance.DueMaintenanceResponse;
-import com.example.backend.AssetManagamentService.duemaintenance.DueMaintenanceCalculator;
-import com.example.backend.AssetManagamentService.duemaintenance.DueStatus;
-import com.example.backend.AssetManagamentService.entity.Asset;
-import com.example.backend.AssetManagamentService.entity.AssetClassPlan;
-import com.example.backend.AssetManagamentService.entity.MaintenancePlan;
-import com.example.backend.AssetManagamentService.entity.OdometerReading;
-import com.example.backend.AssetManagamentService.repository.AssetClassPlanRepository;
-import com.example.backend.AssetManagamentService.repository.AssetRepository;
-import com.example.backend.AssetManagamentService.repository.MaintenancePlanRepository;
-import com.example.backend.AssetManagamentService.repository.OdometerReadingRepository;
-import com.example.backend.AssetManagamentService.service.DueMaintenanceService;
-
-import com.example.backend.AssetManagamentService.status.AssetStatus;
-import com.example.backend.CapacityAndSchedulingService.entity.BayCapability;
-import com.example.backend.CapacityAndSchedulingService.entity.Capability;
-import com.example.backend.CapacityAndSchedulingService.entity.Holiday;
-import com.example.backend.CapacityAndSchedulingService.entity.TechnicianSkill;
-import com.example.backend.CapacityAndSchedulingService.entity.Workshop;
-import com.example.backend.CapacityAndSchedulingService.repository.BayRepository;
-import com.example.backend.CapacityAndSchedulingService.repository.HolidayRepository;
-import com.example.backend.CapacityAndSchedulingService.repository.TechnicianRepository;
-import com.example.backend.CapacityAndSchedulingService.repository.WorkingCalendarRepository;
-import com.example.backend.CapacityAndSchedulingService.repository.WorkshopRepository;
-
-import com.example.backend.ExecutionService.dto.PreventiveBookingResponse;
-import com.example.backend.ExecutionService.entity.Booking;
-import com.example.backend.ExecutionService.entity.WorkOrder;
-import com.example.backend.ExecutionService.repository.BookingRepository;
-import com.example.backend.ExecutionService.repository.WorkOrderRepository;
-import com.example.backend.ExecutionService.status.BookingKind;
-import com.example.backend.ExecutionService.status.BookingStatus;
-import com.example.backend.ExecutionService.status.WorkOrderStatus;
-
-import com.example.slotengine.FeasibleSlotEngine;
-import com.example.slotengine.model.BayCandidate;
-import com.example.slotengine.model.ExistingBooking;
-import com.example.slotengine.model.FeasibleSlot;
-import com.example.slotengine.model.SearchHorizon;
-import com.example.slotengine.model.SkillCertification;
-import com.example.slotengine.model.SlotSearchRequest;
-import com.example.slotengine.model.TechnicianCandidate;
-import com.example.slotengine.model.WorkingDayHours;
-
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Range;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.DayOfWeek;
@@ -64,16 +15,61 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.example.backend.CapacityAndSchedulingService.entity.*;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Range;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.backend.AssetManagamentService.dto.duemaintenance.DueMaintenanceResponse;
+import com.example.backend.AssetManagamentService.duemaintenance.DueMaintenanceCalculator;
+import com.example.backend.AssetManagamentService.duemaintenance.DueStatus;
+import com.example.backend.AssetManagamentService.entity.Asset;
+import com.example.backend.AssetManagamentService.entity.AssetClassPlan;
+import com.example.backend.AssetManagamentService.entity.MaintenancePlan;
+import com.example.backend.AssetManagamentService.entity.OdometerReading;
+import com.example.backend.AssetManagamentService.exception.BusinessValidationException;
+import com.example.backend.AssetManagamentService.exception.DuplicateResourceException;
+import com.example.backend.AssetManagamentService.exception.ResourceNotFoundException;
+import com.example.backend.AssetManagamentService.repository.AssetClassPlanRepository;
+import com.example.backend.AssetManagamentService.repository.AssetRepository;
+import com.example.backend.AssetManagamentService.repository.MaintenancePlanRepository;
+import com.example.backend.AssetManagamentService.repository.OdometerReadingRepository;
+import com.example.backend.AssetManagamentService.service.DueMaintenanceService;
+import com.example.backend.AssetManagamentService.status.AssetStatus;
+import com.example.backend.CapacityAndSchedulingService.repository.BayRepository;
+import com.example.backend.CapacityAndSchedulingService.repository.HolidayRepository;
+import com.example.backend.CapacityAndSchedulingService.repository.TechnicianRepository;
+import com.example.backend.CapacityAndSchedulingService.repository.WorkingCalendarRepository;
+import com.example.backend.CapacityAndSchedulingService.repository.WorkshopRepository;
+import com.example.backend.ExecutionService.dto.booking.PreventiveBookingResponse;
+import com.example.backend.ExecutionService.entity.Booking;
+import com.example.backend.ExecutionService.entity.WorkOrder;
+import com.example.backend.ExecutionService.repository.BookingRepository;
+import com.example.backend.ExecutionService.repository.WorkOrderRepository;
+import com.example.backend.ExecutionService.status.BookingKind;
+import com.example.backend.ExecutionService.status.BookingStatus;
+import com.example.backend.ExecutionService.status.WorkOrderStatus;
+import com.example.backend.common.exception.GlobalExceptionHandler.ConflictException;
+import com.example.slotengine.FeasibleSlotEngine;
+import com.example.slotengine.model.BayCandidate;
+import com.example.slotengine.model.ExistingBooking;
+import com.example.slotengine.model.FeasibleSlot;
+import com.example.slotengine.model.SearchHorizon;
+import com.example.slotengine.model.SkillCertification;
+import com.example.slotengine.model.SlotSearchRequest;
+import com.example.slotengine.model.TechnicianCandidate;
+import com.example.slotengine.model.WorkingDayHours;
+
 @Service
 @Transactional(readOnly = true)
 public class DueMaintenanceServiceImpl
         implements DueMaintenanceService {
 
     /*
-     * Temporary constants.
-     *
-     * FleetServe requires DUE_SOON thresholds to eventually come
-     * from configurable data.
+     * Temporary defaults. Move these to configurable data after the
+     * functional booking flow is stable.
      */
     private static final BigDecimal DUE_SOON_KM =
             new BigDecimal("500");
@@ -82,36 +78,19 @@ public class DueMaintenanceServiceImpl
 
     private static final int SEARCH_HORIZON_DAYS = 30;
 
-    /*
-     * The slot engine returns its results earliest-first.
-     *
-     * Therefore, only the first result from each workshop is needed.
-     * The service then compares those workshop results.
-     */
     private static final int MAX_RESULTS_PER_WORKSHOP = 1;
 
     private final AssetRepository assetRepository;
-
     private final AssetClassPlanRepository assetClassPlanRepository;
-
     private final MaintenancePlanRepository maintenancePlanRepository;
-
     private final OdometerReadingRepository odometerReadingRepository;
-
     private final WorkshopRepository workshopRepository;
-
     private final BayRepository bayRepository;
-
     private final TechnicianRepository technicianRepository;
-
     private final WorkingCalendarRepository workingCalendarRepository;
-
     private final HolidayRepository holidayRepository;
-
     private final BookingRepository bookingRepository;
-
     private final WorkOrderRepository workOrderRepository;
-
     private final Clock clock;
 
     public DueMaintenanceServiceImpl(
@@ -126,8 +105,8 @@ public class DueMaintenanceServiceImpl
             HolidayRepository holidayRepository,
             BookingRepository bookingRepository,
             WorkOrderRepository workOrderRepository,
-            Clock clock
-    ) {
+            Clock clock) {
+
         this.assetRepository = assetRepository;
         this.assetClassPlanRepository = assetClassPlanRepository;
         this.maintenancePlanRepository = maintenancePlanRepository;
@@ -142,39 +121,42 @@ public class DueMaintenanceServiceImpl
         this.clock = clock;
     }
 
-    /*
-     * ==============================================================
-     * Due-maintenance listing
-     * ==============================================================
-     */
-
     @Override
     public List<DueMaintenanceResponse> getDueMaintenanceAssets() {
 
         List<DueMaintenanceResponse> result =
                 new ArrayList<>();
 
-        List<Asset> assets =
-                assetRepository.findAll();
+        List<Asset> activeAssets =
+                assetRepository.findByStatus(
+                        AssetStatus.ACTIVE);
 
-        for (Asset asset : assets) {
+        for (Asset asset : activeAssets) {
 
-            List<AssetClassPlan> assetClassPlans =
+            if (asset.getAssetClass() == null
+                    || asset.getAssetClass().getId() == null) {
+
+                continue;
+            }
+
+            List<AssetClassPlan> mappings =
                     assetClassPlanRepository
                             .findByAssetClass_Id(
-                                    asset.getAssetClass().getId()
-                            );
+                                    asset.getAssetClass().getId());
 
-            for (AssetClassPlan assetClassPlan : assetClassPlans) {
+            for (AssetClassPlan mapping : mappings) {
 
                 MaintenancePlan maintenancePlan =
-                        assetClassPlan.getMaintenancePlan();
+                        mapping.getMaintenancePlan();
+
+                if (maintenancePlan == null) {
+                    continue;
+                }
 
                 DueMaintenanceResponse response =
                         buildDueMaintenanceResponse(
                                 asset,
-                                maintenancePlan
-                        );
+                                maintenancePlan);
 
                 if (!DueStatus.OK.name()
                         .equals(response.getDueStatus())) {
@@ -189,103 +171,107 @@ public class DueMaintenanceServiceImpl
 
     private DueMaintenanceResponse buildDueMaintenanceResponse(
             Asset asset,
-            MaintenancePlan maintenancePlan
-    ) {
+            MaintenancePlan maintenancePlan) {
 
         BigDecimal currentOdometerKm =
                 getLatestOdometer(asset);
 
-        /*
-         * Current baseline:
-         *
-         * asset acquisition odometer
-         * asset acquisition date
-         *
-         * This should later use the latest COMPLETED preventive
-         * WorkOrder for the same asset and maintenance plan.
-         */
+        ServiceBaseline baseline =
+                getServiceBaseline(
+                        asset,
+                        maintenancePlan);
+
         BigDecimal nextDueKm =
                 DueMaintenanceCalculator.nextDueKm(
-                        asset.getAcquisitionOdometerKm(),
-                        maintenancePlan.getDistanceIntervalKm()
-                );
+                        baseline.odometerKm(),
+                        maintenancePlan
+                                .getDistanceIntervalKm());
 
         LocalDate nextDueDate =
                 DueMaintenanceCalculator.nextDueDate(
-                        asset.getAcquisitionDate(),
-                        maintenancePlan.getTimeIntervalDays()
-                );
+                        baseline.serviceDate(),
+                        maintenancePlan
+                                .getTimeIntervalDays());
 
         DueStatus dueStatus =
                 calculateDueStatus(
                         currentOdometerKm,
                         nextDueKm,
-                        nextDueDate
-                );
+                        nextDueDate);
 
         DueMaintenanceResponse response =
                 new DueMaintenanceResponse();
 
-        response.setAssetId(
-                asset.getId()
-        );
-
-        response.setVin(
-                asset.getVin()
-        );
+        response.setAssetId(asset.getId());
+        response.setVin(asset.getVin());
 
         response.setMaintenancePlanId(
-                maintenancePlan.getId()
-        );
+                maintenancePlan.getId());
 
         response.setMaintenancePlanCode(
-                maintenancePlan.getCode()
-        );
+                maintenancePlan.getCode());
 
         response.setCurrentOdometerKm(
-                currentOdometerKm
-        );
+                currentOdometerKm);
 
-        response.setNextDueKm(
-                nextDueKm
-        );
-
-        response.setNextDueDate(
-                nextDueDate
-        );
+        response.setNextDueKm(nextDueKm);
+        response.setNextDueDate(nextDueDate);
 
         response.setDueStatus(
-                dueStatus.name()
-        );
+                dueStatus.name());
 
         return response;
     }
 
+    private ServiceBaseline getServiceBaseline(
+            Asset asset,
+            MaintenancePlan maintenancePlan) {
+
+        List<WorkOrder> completedServices =
+                workOrderRepository
+                        .findCompletedPreventiveServices(
+                                asset.getId(),
+                                maintenancePlan.getId(),
+                                PageRequest.of(0, 1));
+
+        if (!completedServices.isEmpty()) {
+
+            WorkOrder workOrder =
+                    completedServices.get(0);
+
+            return new ServiceBaseline(
+                    workOrder.getOdometerAtService(),
+                    workOrder.getCompletedAt()
+                            .toLocalDate());
+        }
+
+        return new ServiceBaseline(
+                asset.getAcquisitionOdometerKm(),
+                asset.getAcquisitionDate());
+    }
+
     private BigDecimal getLatestOdometer(
-            Asset asset
-    ) {
+            Asset asset) {
 
         return odometerReadingRepository
                 .findFirstByAsset_IdOrderByReadAtDesc(
-                        asset.getId()
-                )
+                        asset.getId())
                 .map(OdometerReading::getReadingKm)
                 .orElse(
-                        asset.getAcquisitionOdometerKm()
-                );
+                        asset.getAcquisitionOdometerKm());
     }
 
     private DueStatus calculateDueStatus(
             BigDecimal currentOdometerKm,
             BigDecimal nextDueKm,
-            LocalDate nextDueDate
-    ) {
+            LocalDate nextDueDate) {
 
         LocalDate today =
                 LocalDate.now(clock);
 
         boolean overdueByDistance =
                 nextDueKm != null
+                        && currentOdometerKm != null
                         && currentOdometerKm
                         .compareTo(nextDueKm) >= 0;
 
@@ -293,12 +279,15 @@ public class DueMaintenanceServiceImpl
                 nextDueDate != null
                         && !today.isBefore(nextDueDate);
 
-        if (overdueByDistance || overdueByDate) {
+        if (overdueByDistance
+                || overdueByDate) {
+
             return DueStatus.OVERDUE;
         }
 
         boolean dueSoonByDistance =
                 nextDueKm != null
+                        && currentOdometerKm != null
                         && nextDueKm
                         .subtract(currentOdometerKm)
                         .compareTo(DUE_SOON_KM) <= 0;
@@ -309,50 +298,47 @@ public class DueMaintenanceServiceImpl
                         .plusDays(DUE_SOON_DAYS)
                         .isBefore(nextDueDate);
 
-        if (dueSoonByDistance || dueSoonByDate) {
+        if (dueSoonByDistance
+                || dueSoonByDate) {
+
             return DueStatus.DUE_SOON;
         }
 
         return DueStatus.OK;
     }
 
-    /*
-     * ==============================================================
-     * Preventive booking creation
-     * ==============================================================
-     */
-
     @Override
     @Transactional
     public PreventiveBookingResponse createPreventiveBooking(
             Long assetId,
-            Long maintenancePlanId
-    ) {
+            Long maintenancePlanId) {
+
+        validateIdentifier(
+                assetId,
+                "Asset ID");
+
+        validateIdentifier(
+                maintenancePlanId,
+                "Maintenance plan ID");
 
         Asset asset =
-                assetRepository
-                        .findById(assetId)
+                assetRepository.findById(assetId)
                         .orElseThrow(() ->
-                                new IllegalArgumentException(
+                                new ResourceNotFoundException(
                                         "Asset not found with id: "
-                                                + assetId
-                                )
-                        );
+                                                + assetId));
 
         MaintenancePlan maintenancePlan =
                 maintenancePlanRepository
                         .findById(maintenancePlanId)
                         .orElseThrow(() ->
-                                new IllegalArgumentException(
+                                new ResourceNotFoundException(
                                         "Maintenance plan not found with id: "
-                                                + maintenancePlanId
-                                )
-                        );
+                                                + maintenancePlanId));
 
         validatePreventiveBookingRequest(
                 asset,
-                maintenancePlan
-        );
+                maintenancePlan);
 
         Long homeDepotId =
                 asset.getHomeDepot().getId();
@@ -360,192 +346,272 @@ public class DueMaintenanceServiceImpl
         List<Workshop> workshops =
                 workshopRepository
                         .findByDepot_IdAndIsActiveTrueOrderByIdAsc(
-                                homeDepotId
-                        );
+                                homeDepotId);
 
         if (workshops.isEmpty()) {
-            throw new IllegalStateException(
+            throw new BusinessValidationException(
                     "No active workshop exists for depot "
-                            + homeDepotId
-            );
+                            + homeDepotId);
         }
 
         SlotSelection selectedSlot =
                 findEarliestSlot(
                         workshops,
-                        maintenancePlan
-                );
+                        maintenancePlan);
+
+        Bay selectedBay =
+                bayRepository
+                        .findById(
+                                selectedSlot.slot().bayId())
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Selected service bay not found: "
+                                                + selectedSlot
+                                                .slot()
+                                                .bayId()));
+
+        Technician selectedTechnician =
+                technicianRepository
+                        .findById(
+                                selectedSlot
+                                        .slot()
+                                        .technicianId())
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Selected technician not found: "
+                                                + selectedSlot
+                                                .slot()
+                                                .technicianId()));
+
+        validateSelectedResources(
+                selectedSlot.workshop(),
+                selectedBay,
+                selectedTechnician);
 
         Booking booking =
                 buildPreventiveBooking(
                         asset,
                         maintenancePlan,
-                        selectedSlot
-                );
+                        selectedSlot,
+                        selectedBay,
+                        selectedTechnician);
 
         Booking savedBooking;
 
         try {
-            /*
-             * The slot engine operates on a snapshot of existing
-             * bookings.
+            /* trying to save without hibernate
              *
-             * Another request may take the selected slot between
-             * slot calculation and INSERT.
+             * saveAndFlush forces PostgreSQL to immediately evaluate:
              *
-             * saveAndFlush causes PostgreSQL to evaluate the
-             * exclusion constraints immediately.
+             * 1. bay/slot GiST exclusion constraint
+             * 2. technician/slot GiST exclusion constraint
+             * 3. active preventive booking uniqueness
              */
-            savedBooking =
-                    bookingRepository.saveAndFlush(
-                            booking
-                    );
+             savedBooking = bookingRepository.saveAndFlush(booking);
+
 
         } catch (DataIntegrityViolationException exception) {
 
-            throw new IllegalStateException(
-                    "The selected booking slot was taken by another "
-                            + "request. Search for another slot.",
-                    exception
-            );
+            throw new ConflictException(
+                    "The selected bay or technician is no longer "
+                            + "available, or an active preventive booking "
+                            + "already exists for this asset and plan. "
+                            + "Search for another slot.");
         }
 
         WorkOrder workOrder =
                 buildScheduledWorkOrder(
-                        asset,
-                        savedBooking
-                );
+                        savedBooking);
 
-        WorkOrder savedWorkOrder =
-                workOrderRepository.saveAndFlush(
-                        workOrder
-                );
+        WorkOrder savedWorkOrder;
 
-        /*
-         * WorkOrder.booking owns the relationship.
-         *
-         * Booking.workOrder is mappedBy and therefore is the
-         * inverse side. This assignment keeps the Java object
-         * graph consistent.
-         */
+        try {
+            savedWorkOrder =
+                    workOrderRepository
+                            .saveAndFlush(
+                                    workOrder);
+
+        } catch (DataIntegrityViolationException exception) {
+
+            throw new ConflictException(
+                    "A work order already exists for booking "
+                            + savedBooking.getId());
+        }
+
         savedBooking.setWorkOrder(
-                savedWorkOrder
-        );
+                savedWorkOrder);
 
         return buildPreventiveBookingResponse(
                 savedBooking,
                 savedWorkOrder,
-                selectedSlot
-        );
+                selectedSlot);
     }
-
-    /*
-     * ==============================================================
-     * Preventive booking validation
-     * ==============================================================
-     */
 
     private void validatePreventiveBookingRequest(
             Asset asset,
-            MaintenancePlan maintenancePlan
-    ) {
+            MaintenancePlan maintenancePlan) {
+
+        if (asset.getStatus()
+                != AssetStatus.ACTIVE) {
+
+            throw new BusinessValidationException(
+                    "Only active assets can be booked "
+                            + "for preventive maintenance");
+        }
+
+        if (asset.getHomeDepot() == null
+                || asset.getHomeDepot().getId() == null) {
+
+            throw new BusinessValidationException(
+                    "Asset "
+                            + asset.getId()
+                            + " is not assigned to a home depot");
+        }
+
+        if (!Boolean.TRUE.equals(
+                asset.getHomeDepot().getActive())) {
+
+            throw new BusinessValidationException(
+                    "The home depot for asset "
+                            + asset.getId()
+                            + " is inactive");
+        }
 
         boolean planBelongsToAssetClass =
                 assetClassPlanRepository
                         .existsByAssetClass_IdAndMaintenancePlan_Id(
                                 asset.getAssetClass().getId(),
-                                maintenancePlan.getId()
-                        );
+                                maintenancePlan.getId());
 
         if (!planBelongsToAssetClass) {
-            throw new IllegalArgumentException(
+            throw new BusinessValidationException(
                     "Maintenance plan "
                             + maintenancePlan.getId()
                             + " is not mapped to asset class "
-                            + asset.getAssetClass().getId()
-            );
+                            + asset.getAssetClass().getId());
         }
 
         Integer estimatedDurationMinutes =
-                maintenancePlan.getEstimatedDurationMinutes();
+                maintenancePlan
+                        .getEstimatedDurationMinutes();
 
         if (estimatedDurationMinutes == null
                 || estimatedDurationMinutes <= 0) {
 
-            throw new IllegalArgumentException(
-                    "Maintenance plan estimated duration "
-                            + "must be positive"
-            );
-        }
-
-        if (asset.getStatus()!= AssetStatus.ACTIVE) {
-            throw new IllegalStateException(
-                    "Inactive assets cannot be booked"
-            );
+            throw new BusinessValidationException(
+                    "Maintenance-plan estimated duration "
+                            + "must be greater than zero");
         }
 
         if (estimatedDurationMinutes
-                % FeasibleSlotEngine.SLOT_GRANULARITY_MINUTES
-                != 0) {
+                % FeasibleSlotEngine
+                .SLOT_GRANULARITY_MINUTES != 0) {
 
-            throw new IllegalArgumentException(
-                    "Maintenance plan estimated duration "
+            throw new BusinessValidationException(
+                    "Maintenance-plan estimated duration "
                             + "must be a multiple of "
                             + FeasibleSlotEngine
                             .SLOT_GRANULARITY_MINUTES
-                            + " minutes"
-            );
+                            + " minutes");
+        }
+
+        if (maintenancePlan
+                .getRequiredSkillCode() == null
+                || maintenancePlan
+                .getRequiredSkillCode()
+                .isBlank()) {
+
+            throw new BusinessValidationException(
+                    "Maintenance plan must define "
+                            + "a required technician skill");
+        }
+
+        if (maintenancePlan
+                .getRequiredCapabilityCode() == null
+                || maintenancePlan
+                .getRequiredCapabilityCode()
+                .isBlank()) {
+
+            throw new BusinessValidationException(
+                    "Maintenance plan must define "
+                            + "a required bay capability");
         }
 
         DueMaintenanceResponse dueMaintenance =
                 buildDueMaintenanceResponse(
                         asset,
-                        maintenancePlan
-                );
+                        maintenancePlan);
 
         if (DueStatus.OK.name()
-                .equals(dueMaintenance.getDueStatus())) {
+                .equals(
+                        dueMaintenance.getDueStatus())) {
 
-            throw new IllegalStateException(
+            throw new BusinessValidationException(
                     "Asset "
                             + asset.getId()
                             + " is not due for maintenance plan "
-                            + maintenancePlan.getId()
-            );
+                            + maintenancePlan.getId());
         }
 
-        boolean exists =
+        boolean activeBookingExists =
                 bookingRepository
-                        .existsByAssetIdAndMaintenancePlanIdAndStatusIn(
+                        .existsByAsset_IdAndMaintenancePlan_IdAndStatusIn(
                                 asset.getId(),
                                 maintenancePlan.getId(),
                                 List.of(
-                                        BookingStatus.HELD,
-                                        BookingStatus.CONFIRMED
-                                )
-                        );
+                                        BookingStatus.CONFIRMED));
 
-        if(exists){
-            throw new IllegalArgumentException(
-                    "Preventive booking for maintenance plan "
-                            + maintenancePlan.getId()
-                            + " and asset class "
-                            + asset.getAssetClass().getId()
-                            + " is already done"
-            );
+        if (activeBookingExists) {
+            throw new DuplicateResourceException(
+                    "A confirmed preventive booking already "
+                            + "exists for asset "
+                            + asset.getId()
+                            + " and maintenance plan "
+                            + maintenancePlan.getId());
         }
     }
 
-    /*
-     * ==============================================================
-     * Find the earliest slot across all active workshops
-     * ==============================================================
-     */
+    private void validateSelectedResources(
+            Workshop workshop,
+            Bay bay,
+            Technician technician) {
+
+        if (bay.getWorkshop() == null
+                || !workshop.getId().equals(
+                bay.getWorkshop().getId())) {
+
+            throw new BusinessValidationException(
+                    "Selected service bay does not belong "
+                            + "to the selected workshop");
+        }
+
+        if (!Boolean.TRUE.equals(
+                bay.getIsActive())) {
+
+            throw new BusinessValidationException(
+                    "Selected service bay is inactive");
+        }
+
+        if (technician.getWorkshop() == null
+                || !workshop.getId().equals(
+                technician.getWorkshop().getId())) {
+
+            throw new BusinessValidationException(
+                    "Selected technician does not belong "
+                            + "to the selected workshop");
+        }
+
+        if (!Boolean.TRUE.equals(
+                technician.getActive())) {
+
+            throw new BusinessValidationException(
+                    "Selected technician is inactive");
+        }
+    }
 
     private SlotSelection findEarliestSlot(
             List<Workshop> workshops,
-            MaintenancePlan maintenancePlan
-    ) {
+            MaintenancePlan maintenancePlan) {
 
         SlotSelection earliestSelection = null;
 
@@ -554,8 +620,7 @@ public class DueMaintenanceServiceImpl
             SlotSelection workshopSelection =
                     findEarliestSlotAtWorkshop(
                             workshop,
-                            maintenancePlan
-                    );
+                            maintenancePlan);
 
             if (workshopSelection == null) {
                 continue;
@@ -564,8 +629,7 @@ public class DueMaintenanceServiceImpl
             if (earliestSelection == null
                     || compareSlotSelections(
                     workshopSelection,
-                    earliestSelection
-            ) < 0) {
+                    earliestSelection) < 0) {
 
                 earliestSelection =
                         workshopSelection;
@@ -573,12 +637,11 @@ public class DueMaintenanceServiceImpl
         }
 
         if (earliestSelection == null) {
-            throw new IllegalStateException(
+            throw new BusinessValidationException(
                     "No feasible preventive-maintenance slot "
                             + "was found within the next "
                             + SEARCH_HORIZON_DAYS
-                            + " days"
-            );
+                            + " days");
         }
 
         return earliestSelection;
@@ -586,13 +649,11 @@ public class DueMaintenanceServiceImpl
 
     private int compareSlotSelections(
             SlotSelection first,
-            SlotSelection second
-    ) {
+            SlotSelection second) {
 
         int startComparison =
                 first.start().compareTo(
-                        second.start()
-                );
+                        second.start());
 
         if (startComparison != 0) {
             return startComparison;
@@ -601,8 +662,7 @@ public class DueMaintenanceServiceImpl
         int workshopComparison =
                 Long.compare(
                         first.workshop().getId(),
-                        second.workshop().getId()
-                );
+                        second.workshop().getId());
 
         if (workshopComparison != 0) {
             return workshopComparison;
@@ -611,8 +671,7 @@ public class DueMaintenanceServiceImpl
         int bayComparison =
                 Long.compare(
                         first.slot().bayId(),
-                        second.slot().bayId()
-                );
+                        second.slot().bayId());
 
         if (bayComparison != 0) {
             return bayComparison;
@@ -620,45 +679,28 @@ public class DueMaintenanceServiceImpl
 
         return Long.compare(
                 first.slot().technicianId(),
-                second.slot().technicianId()
-        );
+                second.slot().technicianId());
     }
-
-    /*
-     * ==============================================================
-     * Find the earliest slot at one workshop
-     * ==============================================================
-     */
 
     private SlotSelection findEarliestSlotAtWorkshop(
             Workshop workshop,
-            MaintenancePlan maintenancePlan
-    ) {
+            MaintenancePlan maintenancePlan) {
 
         ZoneId workshopZone =
                 getWorkshopZone(workshop);
 
-        /*
-         * Start from tomorrow.
-         *
-         * The slot engine searches complete working days and does not
-         * currently accept an earliest LocalTime for the first day.
-         * Starting tomorrow prevents creation of a booking in the past.
-         */
         LocalDate searchStartDate =
                 LocalDate.now(
-                        clock.withZone(workshopZone)
-                ).plusDays(1);
+                                clock.withZone(workshopZone))
+                        .plusDays(1);
 
         LocalDate searchEndDateExclusive =
                 searchStartDate.plusDays(
-                        SEARCH_HORIZON_DAYS
-                );
+                        SEARCH_HORIZON_DAYS);
 
         List<BayCandidate> bayCandidates =
                 buildBayCandidates(
-                        workshop.getId()
-                );
+                        workshop.getId());
 
         if (bayCandidates.isEmpty()) {
             return null;
@@ -666,8 +708,7 @@ public class DueMaintenanceServiceImpl
 
         List<TechnicianCandidate> technicianCandidates =
                 buildTechnicianCandidates(
-                        workshop.getId()
-                );
+                        workshop.getId());
 
         if (technicianCandidates.isEmpty()) {
             return null;
@@ -678,10 +719,12 @@ public class DueMaintenanceServiceImpl
                 buildSlotEngineCalendar(
                         workshop.getId(),
                         searchStartDate,
-                        searchEndDateExclusive
-                );
+                        searchEndDateExclusive);
 
-        if (slotEngineCalendar.weeklyHours().isEmpty()) {
+        if (slotEngineCalendar
+                .weeklyHours()
+                .isEmpty()) {
+
             return null;
         }
 
@@ -700,8 +743,7 @@ public class DueMaintenanceServiceImpl
                         workshop.getId(),
                         workshopZone,
                         horizonStart,
-                        horizonEnd
-                );
+                        horizonEnd);
 
         SlotSearchRequest request =
                 new SlotSearchRequest(
@@ -717,15 +759,12 @@ public class DueMaintenanceServiceImpl
                         existingBookings,
                         new SearchHorizon(
                                 searchStartDate,
-                                SEARCH_HORIZON_DAYS
-                        ),
-                        MAX_RESULTS_PER_WORKSHOP
-                );
+                                SEARCH_HORIZON_DAYS),
+                        MAX_RESULTS_PER_WORKSHOP);
 
         List<FeasibleSlot> feasibleSlots =
                 FeasibleSlotEngine.findSlots(
-                        request
-                );
+                        request);
 
         if (feasibleSlots.isEmpty()) {
             return null;
@@ -735,15 +774,13 @@ public class DueMaintenanceServiceImpl
                 feasibleSlots.get(0);
 
         OffsetDateTime start =
-                firstSlot
-                        .date()
+                firstSlot.date()
                         .atTime(firstSlot.start())
                         .atZone(workshopZone)
                         .toOffsetDateTime();
 
         OffsetDateTime end =
-                firstSlot
-                        .date()
+                firstSlot.date()
                         .atTime(firstSlot.end())
                         .atZone(workshopZone)
                         .toOffsetDateTime();
@@ -752,54 +789,42 @@ public class DueMaintenanceServiceImpl
                 workshop,
                 firstSlot,
                 start,
-                end
-        );
+                end);
     }
 
     private ZoneId getWorkshopZone(
-            Workshop workshop
-    ) {
+            Workshop workshop) {
 
         if (workshop.getTimeZone() == null
-                || workshop.getTimeZone().isBlank()) {
+                || workshop.getTimeZone()
+                .isBlank()) {
 
-            throw new IllegalStateException(
-                    "Time zone is not configured for workshop "
-                            + workshop.getId()
-            );
+            throw new BusinessValidationException(
+                    "Time zone is not configured "
+                            + "for workshop "
+                            + workshop.getId());
         }
 
         try {
             return ZoneId.of(
-                    workshop.getTimeZone()
-            );
+                    workshop.getTimeZone());
 
         } catch (RuntimeException exception) {
 
-            throw new IllegalStateException(
+            throw new BusinessValidationException(
                     "Invalid time zone configured for workshop "
                             + workshop.getId()
                             + ": "
-                            + workshop.getTimeZone(),
-                    exception
-            );
+                            + workshop.getTimeZone());
         }
     }
 
-    /*
-     * ==============================================================
-     * Convert bays into slot-engine input
-     * ==============================================================
-     */
-
     private List<BayCandidate> buildBayCandidates(
-            Long workshopId
-    ) {
+            Long workshopId) {
 
         return bayRepository
                 .findByWorkshop_IdOrderByIdAsc(
-                        workshopId
-                )
+                        workshopId)
                 .stream()
                 .map(bay -> {
 
@@ -807,41 +832,28 @@ public class DueMaintenanceServiceImpl
                             bay.getCapabilities()
                                     .stream()
                                     .map(
-                                            BayCapability::getCapability
-                                    )
+                                            BayCapability::getCapability)
                                     .map(
-                                            Capability::getCapabilityCode
-                                    )
+                                            Capability::getCapabilityCode)
                                     .collect(
-                                            Collectors.toSet()
-                                    );
+                                            Collectors.toSet());
 
                     return new BayCandidate(
                             bay.getId(),
                             Boolean.TRUE.equals(
-                                    bay.getIsActive()
-                            ),
-                            capabilityCodes
-                    );
+                                    bay.getIsActive()),
+                            capabilityCodes);
                 })
                 .toList();
     }
 
-    /*
-     * ==============================================================
-     * Convert technicians into slot-engine input
-     * ==============================================================
-     */
-
     private List<TechnicianCandidate>
     buildTechnicianCandidates(
-            Long workshopId
-    ) {
+            Long workshopId) {
 
         return technicianRepository
                 .findByWorkshop_IdOrderByIdAsc(
-                        workshopId
-                )
+                        workshopId)
                 .stream()
                 .map(technician -> {
 
@@ -850,52 +862,39 @@ public class DueMaintenanceServiceImpl
                                     .getTechnicianSkills()
                                     .stream()
                                     .map(
-                                            this::toSkillCertification
-                                    )
+                                            this::toSkillCertification)
                                     .toList();
 
                     return new TechnicianCandidate(
                             technician.getId(),
                             Boolean.TRUE.equals(
-                                    technician.getActive()
-                            ),
-                            certifications
-                    );
+                                    technician.getActive()),
+                            certifications);
                 })
                 .toList();
     }
 
     private SkillCertification toSkillCertification(
-            TechnicianSkill technicianSkill
-    ) {
+            TechnicianSkill technicianSkill) {
 
         return new SkillCertification(
                 technicianSkill
                         .getSkill()
                         .getSkillCode(),
                 technicianSkill.getValidFrom(),
-                technicianSkill.getValidTo()
-        );
+                technicianSkill.getValidTo());
     }
-
-    /*
-     * ==============================================================
-     * Convert workshop calendar into slot-engine input
-     * ==============================================================
-     */
 
     private com.example.slotengine.model.WorkingCalendar
     buildSlotEngineCalendar(
             Long workshopId,
             LocalDate startDate,
-            LocalDate endDateExclusive
-    ) {
+            LocalDate endDateExclusive) {
 
         Map<DayOfWeek, WorkingDayHours> weeklyHours =
                 workingCalendarRepository
                         .findByWorkshop_IdOrderByDayOfWeekAsc(
-                                workshopId
-                        )
+                                workshopId)
                         .stream()
                         .collect(
                                 Collectors.toMap(
@@ -903,287 +902,176 @@ public class DueMaintenanceServiceImpl
                                                 DayOfWeek.of(
                                                         calendar
                                                                 .getDayOfWeek()
-                                                                .intValue()
-                                                ),
+                                                                .intValue()),
                                         calendar ->
                                                 new WorkingDayHours(
                                                         calendar.getOpenTime(),
-                                                        calendar.getCloseTime()
-                                                ),
+                                                        calendar.getCloseTime()),
                                         (first, second) -> {
-                                            throw new IllegalStateException(
+                                            throw new BusinessValidationException(
                                                     "Duplicate working-calendar "
                                                             + "entry for workshop "
-                                                            + workshopId
-                                            );
+                                                            + workshopId);
                                         },
                                         () ->
                                                 new EnumMap<>(
-                                                        DayOfWeek.class
-                                                )
-                                )
-                        );
+                                                        DayOfWeek.class)));
 
         Set<LocalDate> holidayDates =
                 holidayRepository
                         .findApplicableHolidays(
                                 workshopId,
                                 startDate,
-                                endDateExclusive
-                        )
+                                endDateExclusive)
                         .stream()
                         .map(
-                                Holiday::getHolidayDate
-                        )
+                                Holiday::getHolidayDate)
                         .collect(
-                                Collectors.toSet()
-                        );
+                                Collectors.toSet());
 
         return new com.example.slotengine.model.WorkingCalendar(
                 weeklyHours,
-                holidayDates
-        );
+                holidayDates);
     }
-
-    /*
-     * ==============================================================
-     * Convert active database bookings into slot-engine input
-     * ==============================================================
-     */
 
     private List<ExistingBooking> buildExistingBookings(
             Long workshopId,
             ZoneId workshopZone,
             OffsetDateTime horizonStart,
-            OffsetDateTime horizonEnd
-    ) {
+            OffsetDateTime horizonEnd) {
 
         return bookingRepository
                 .findBlockingBookings(
                         workshopId,
                         horizonStart,
-                        horizonEnd
-                )
+                        horizonEnd)
                 .stream()
                 .map(booking ->
                         toExistingBooking(
                                 booking,
-                                workshopZone
-                        )
-                )
+                                workshopZone))
                 .toList();
     }
 
     private ExistingBooking toExistingBooking(
             Booking booking,
-            ZoneId workshopZone
-    ) {
+            ZoneId workshopZone) {
 
-        if (booking.getSlot() == null) {
-            throw new IllegalStateException(
+        OffsetDateTime start = booking.getStartAt();
+        OffsetDateTime end = booking.getEndAt();
+
+        if (start == null || end == null) {
+            throw new BusinessValidationException(
                     "Booking "
                             + booking.getId()
-                            + " does not contain a slot"
-            );
+                            + " has an incomplete slot");
         }
 
-        OffsetDateTime start =
-                getBoundedRangeValue(
-                        booking
-                                .getSlot()
-                                .getLowerBound(),
-                        booking.getId(),
-                        "lower"
-                );
+        if (!end.isAfter(start)) {
+            throw new BusinessValidationException(
+                    "Booking "
+                            + booking.getId()
+                            + " has an invalid slot interval");
+        }
 
-        OffsetDateTime end =
-                getBoundedRangeValue(
-                        booking
-                                .getSlot()
-                                .getUpperBound(),
-                        booking.getId(),
-                        "upper"
-                );
+        if (booking.getBay() == null
+                || booking.getTechnician() == null) {
+
+            throw new BusinessValidationException(
+                    "Booking "
+                            + booking.getId()
+                            + " does not contain assigned resources");
+        }
 
         ZonedDateTime localStart =
                 start.atZoneSameInstant(
-                        workshopZone
-                );
+                        workshopZone);
 
         ZonedDateTime localEnd =
                 end.atZoneSameInstant(
-                        workshopZone
-                );
+                        workshopZone);
 
-        if (!localStart
-                .toLocalDate()
+        if (!localStart.toLocalDate()
                 .equals(localEnd.toLocalDate())) {
 
-            throw new IllegalStateException(
+            throw new BusinessValidationException(
                     "Existing booking "
                             + booking.getId()
-                            + " spans multiple workshop-local dates"
-            );
+                            + " spans multiple workshop-local dates");
         }
 
         return new ExistingBooking(
                 localStart.toLocalDate(),
-                localStart
-                        .toLocalTime()
+                localStart.toLocalTime()
                         .withSecond(0)
                         .withNano(0),
-                localEnd
-                        .toLocalTime()
+                localEnd.toLocalTime()
                         .withSecond(0)
                         .withNano(0),
-                booking.getBayId(),
-                booking.getTechnicianId()
-        );
+                booking.getBay().getId(),
+                booking.getTechnician().getId());
     }
-
-    private OffsetDateTime getBoundedRangeValue(
-            Range.Bound<OffsetDateTime> bound,
-            Long bookingId,
-            String boundName
-    ) {
-
-        return bound
-                .getValue()
-                .orElseThrow(() ->
-                        new IllegalStateException(
-                                "Booking "
-                                        + bookingId
-                                        + " contains an unbounded "
-                                        + boundName
-                                        + " slot value"
-                        )
-                );
-    }
-
-    /*
-     * ==============================================================
-     * Build preventive Booking entity
-     * ==============================================================
-     */
 
     private Booking buildPreventiveBooking(
             Asset asset,
             MaintenancePlan maintenancePlan,
-            SlotSelection selectedSlot
-    ) {
+            SlotSelection selectedSlot,
+            Bay selectedBay,
+            Technician selectedTechnician) {
 
         Booking booking =
                 new Booking();
 
-        booking.setAsset(
-                asset
-        );
+        System.out.println("preventing oye");
+        booking.setAsset(asset);
 
         booking.setWorkshop(
-                selectedSlot.workshop()
-        );
+                selectedSlot.workshop());
 
-        booking.setBayId(
-                selectedSlot.slot().bayId()
-        );
+        booking.setBay(
+                selectedBay);
 
-        booking.setTechnicianId(
-                selectedSlot.slot().technicianId()
-        );
+        booking.setTechnician(
+                selectedTechnician);
 
-        /*
-         * Range.rightOpen creates:
-         *
-         * [start, end)
-         *
-         * This matches the slot engine and PostgreSQL tstzrange
-         * half-open interval convention.
-         */
-        booking.setSlot(
-                Range.rightOpen(
-                        selectedSlot.start(),
-                        selectedSlot.end()
-                )
-        );
-
+        booking.setStartAt(selectedSlot.start());
+        booking.setEndAt(selectedSlot.end());
         booking.setKind(
-                BookingKind.PREVENTIVE
-        );
+                BookingKind.PREVENTIVE);
 
-        booking.setMaintenancePlanId(
-                maintenancePlan.getId()
-        );
+        booking.setMaintenancePlan(
+                maintenancePlan);
 
-        booking.setBreakdownRequest(
-                null
-        );
+        booking.setBreakdownRequest(null);
 
         booking.setStatus(
-                BookingStatus.CONFIRMED
-        );
+                BookingStatus.CONFIRMED);
 
-        /*
-         * Do not manually set the version.
-         * Hibernate manages the @Version field.
-         */
+        System.out.println("===========\n"+booking.toString()+"==========\n");
 
         return booking;
     }
 
-    /*
-     * ==============================================================
-     * Build scheduled WorkOrder entity
-     * ==============================================================
-     */
-
     private WorkOrder buildScheduledWorkOrder(
-            Asset asset,
-            Booking booking
-    ) {
-
+            Booking booking) {
+        System.out.println("inside work order");
         WorkOrder workOrder =
                 new WorkOrder();
 
         workOrder.setWorkOrderNumber(
-                generateWorkOrderNumber()
-        );
+                generateWorkOrderNumber());
 
         workOrder.setBooking(
-                booking
-        );
-
-        workOrder.setAsset(
-                asset
-        );
+                booking);
 
         workOrder.setStatus(
-                WorkOrderStatus.SCHEDULED
-        );
+                WorkOrderStatus.SCHEDULED);
 
-        workOrder.setStartedAt(
-                null
-        );
-
-        workOrder.setCompletedAt(
-                null
-        );
-
-        workOrder.setOdometerAtService(
-                null
-        );
-
-        workOrder.setTotalCost(
-                BigDecimal.ZERO
-        );
-
-        workOrder.setIdempotencyKey(
-                null
-        );
-
-        /*
-         * Do not manually set the version.
-         * Hibernate manages the @Version field.
-         */
+        workOrder.setStartedAt(booking.getStartAt());
+        workOrder.setCompletedAt(null);
+        workOrder.setOdometerAtService(null);
+        workOrder.setTotalCost(BigDecimal.ZERO);
+        workOrder.setIdempotencyKey(null);
 
         return workOrder;
     }
@@ -1196,88 +1084,82 @@ public class DueMaintenanceServiceImpl
                 .toUpperCase();
     }
 
-    /*
-     * ==============================================================
-     * Response mapping
-     * ==============================================================
-     */
-
     private PreventiveBookingResponse
     buildPreventiveBookingResponse(
             Booking booking,
             WorkOrder workOrder,
-            SlotSelection selectedSlot
-    ) {
+            SlotSelection selectedSlot) {
 
         PreventiveBookingResponse response =
                 new PreventiveBookingResponse();
 
         response.setBookingId(
-                booking.getId()
-        );
+                booking.getId());
 
         response.setWorkOrderId(
-                workOrder.getId()
-        );
+                workOrder.getId());
 
         response.setWorkOrderNumber(
-                workOrder.getWorkOrderNumber()
-        );
+                workOrder.getWorkOrderNumber());
 
         response.setAssetId(
-                booking.getAsset().getId()
-        );
+                booking.getAsset().getId());
 
         response.setMaintenancePlanId(
-                booking.getMaintenancePlanId()
-        );
+                booking.getMaintenancePlan().getId());
 
         response.setWorkshopId(
-                booking.getWorkshop().getId()
-        );
+                booking.getWorkshop().getId());
 
         response.setBayId(
-                booking.getBayId()
-        );
+                booking.getBay().getId());
 
         response.setTechnicianId(
-                booking.getTechnicianId()
-        );
+                booking.getTechnician().getId());
 
         response.setStart(
-                selectedSlot.start()
-        );
+                selectedSlot.start());
 
         response.setEnd(
-                selectedSlot.end()
-        );
+                selectedSlot.end());
 
         response.setBookingKind(
-                booking.getKind().name()
-        );
+                booking.getKind().name());
 
         response.setBookingStatus(
-                booking.getStatus().name()
-        );
+                booking.getStatus().name());
 
         response.setWorkOrderStatus(
-                workOrder.getStatus().name()
-        );
+                workOrder.getStatus().name());
 
         return response;
     }
 
-    /*
-     * ==============================================================
-     * Internal value object
-     * ==============================================================
-     */
+    private void validateIdentifier(
+            Long value,
+            String fieldName) {
+
+        if (value == null) {
+            throw new IllegalArgumentException(
+                    fieldName + " is required");
+        }
+
+        if (value <= 0L) {
+            throw new IllegalArgumentException(
+                    fieldName
+                            + " must be greater than zero");
+        }
+    }
 
     private record SlotSelection(
             Workshop workshop,
             FeasibleSlot slot,
             OffsetDateTime start,
-            OffsetDateTime end
-    ) {
+            OffsetDateTime end) {
+    }
+
+    private record ServiceBaseline(
+            BigDecimal odometerKm,
+            LocalDate serviceDate) {
     }
 }

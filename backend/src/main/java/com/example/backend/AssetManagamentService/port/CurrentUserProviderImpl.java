@@ -31,5 +31,6 @@ public class CurrentUserProviderImpl implements CurrentUserProvider {
                 .orElseThrow(() -> new IllegalStateException("Authenticated user not found in DB: " + username));
 
         return user.getId();
+
     }
 }

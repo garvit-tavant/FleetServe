@@ -1,4 +1,4 @@
-package com.example.backend.ExecutionService.dto;
+package com.example.backend.ExecutionService.dto.booking;
 
 import java.time.OffsetDateTime;
 

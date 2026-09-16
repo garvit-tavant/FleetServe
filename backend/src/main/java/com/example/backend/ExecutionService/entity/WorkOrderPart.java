@@ -1,49 +1,61 @@
 package com.example.backend.ExecutionService.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-
 import java.math.BigDecimal;
+
+import com.example.backend.InventoryService.entity.InventoryMovement;
+import com.example.backend.InventoryService.entity.Part;
+
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "work_order_part")
 public class WorkOrderPart {
-    /*
-      id            BIGINT GENERATED ALWAYS AS IDENTITY,
-    work_order_id BIGINT         NOT NULL,
-    part_id       BIGINT         NOT NULL,
-    quantity      NUMERIC(12,3) NOT NULL,
-    unit_cost     NUMERIC(12,2) NOT NULL,
-    movement_id   BIGINT         NOT NULL,
-    */
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "work_order_id", nullable = false)
+    @ManyToOne(
+            fetch = FetchType.LAZY,
+            optional = false)
+    @JoinColumn(
+            name = "work_order_id",
+            nullable = false)
     private WorkOrder workOrder;
 
-    @Column(name = "part_id", nullable = false)
-    private Long partId;
+    @ManyToOne(
+            fetch = FetchType.LAZY,
+            optional = false)
+    @JoinColumn(
+            name = "part_id",
+            nullable = false)
+    private Part part;
 
-    @Column(name = "quantity", nullable = false, precision = 12, scale = 3)
+    @Column(
+            name = "quantity",
+            nullable = false,
+            precision = 12,
+            scale = 3)
     private BigDecimal quantity;
 
-    @Column(name = "unit_cost", nullable = false, precision = 12, scale = 2)
+    @Column(
+            name = "unit_cost",
+            nullable = false,
+            precision = 12,
+            scale = 2)
     private BigDecimal unitCost;
 
-    @Column(name = "movement_id", nullable = false)
-    private Long movementId;
+    @OneToOne(
+            fetch = FetchType.LAZY,
+            optional = false)
+    @JoinColumn(
+            name = "movement_id",
+            nullable = false,
+            unique = true)
+    private InventoryMovement movement;
 
-    //getters and setters
+    // getters setters
+
 
     public Long getId() {
         return id;
@@ -61,12 +73,12 @@ public class WorkOrderPart {
         this.workOrder = workOrder;
     }
 
-    public Long getPartId() {
-        return partId;
+    public Part getPart() {
+        return part;
     }
 
-    public void setPartId(Long partId) {
-        this.partId = partId;
+    public void setPart(Part part) {
+        this.part = part;
     }
 
     public BigDecimal getQuantity() {
@@ -85,11 +97,11 @@ public class WorkOrderPart {
         this.unitCost = unitCost;
     }
 
-    public Long getMovementId() {
-        return movementId;
+    public InventoryMovement getMovement() {
+        return movement;
     }
 
-    public void setMovementId(Long movementId) {
-        this.movementId = movementId;
+    public void setMovement(InventoryMovement movement) {
+        this.movement = movement;
     }
 }

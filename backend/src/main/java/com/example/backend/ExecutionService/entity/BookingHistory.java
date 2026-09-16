@@ -1,61 +1,69 @@
 package com.example.backend.ExecutionService.entity;
 
-import java.time.Instant;
 import java.time.OffsetDateTime;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.springframework.data.domain.Range;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.example.backend.SecurityService.entity.AppUser;
+
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "booking_history")
 public class BookingHistory {
-    /*
-     id               BIGINT GENERATED ALWAYS AS IDENTITY,
-    booking_id       BIGINT       NOT NULL,
-    action           VARCHAR(50)  NOT NULL,
-    previous_slot    TSTZRANGE,
-    new_slot         TSTZRANGE,
-    actor_id         BIGINT       NOT NULL,
-    reason           VARCHAR(1000),
-    occurred_at      TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    */
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "booking_id", nullable = false)
-    private Long bookingId;
+    @ManyToOne(
+            fetch = FetchType.LAZY,
+            optional = false)
+    @JoinColumn(
+            name = "booking_id",
+            nullable = false)
+    private Booking booking;
 
-    @Column(name = "action", nullable = false)
+    @Column(
+            name = "action",
+            nullable = false,
+            length = 50)
     private String action;
 
-    @JdbcTypeCode(SqlTypes.OFFSET_DATE_TIME)
-    @Column(name = "previous_slot",columnDefinition = "tstzrange")
-    private org.springframework.data.domain.Range<OffsetDateTime> previousSlot;
+    @Column(name = "previous_start_at")
+    private OffsetDateTime previousStartAt;
 
-    @JdbcTypeCode(SqlTypes.OFFSET_DATE_TIME)
-    @Column(name = "new_slot",columnDefinition = "tstzrange")
-    private org.springframework.data.domain.Range<OffsetDateTime> newSlot;
+    @Column(name = "previous_end_at")
+    private OffsetDateTime previousEndAt;
 
-    @Column(name = "actor_id", nullable = false)
-    private Long actorId;
+    @Column(name = "new_start_at")
+    private OffsetDateTime newStartAt;
 
-    @Column(name = "reason")
+    @Column(name = "new_end_at")
+    private OffsetDateTime newEndAt;
+
+    @ManyToOne(
+            fetch = FetchType.LAZY,
+            optional = false)
+    @JoinColumn(
+            name = "actor_id",
+            nullable = false)
+    private AppUser actor;
+
+    @Column(
+            name = "reason",
+            length = 1000)
     private String reason;
 
-    @Column(name = "occurred_at", nullable = false)
-    private Instant occurredAt;
+    @Column(
+            name = "occurred_at",
+            nullable = false)
+    private OffsetDateTime occurredAt;
 
+    // getters setters
 
-    // getters and setters
 
     public Long getId() {
         return id;
@@ -65,12 +73,12 @@ public class BookingHistory {
         this.id = id;
     }
 
-    public Long getBookingId() {
-        return bookingId;
+    public Booking getBooking() {
+        return booking;
     }
 
-    public void setBookingId(Long bookingId) {
-        this.bookingId = bookingId;
+    public void setBooking(Booking booking) {
+        this.booking = booking;
     }
 
     public String getAction() {
@@ -81,28 +89,12 @@ public class BookingHistory {
         this.action = action;
     }
 
-    public org.springframework.data.domain.Range<OffsetDateTime> getPreviousSlot() {
-        return previousSlot;
+    public AppUser getActor() {
+        return actor;
     }
 
-    public void setPreviousSlot(org.springframework.data.domain.Range<OffsetDateTime> previousSlot) {
-        this.previousSlot = previousSlot;
-    }
-
-    public org.springframework.data.domain.Range<OffsetDateTime> getNewSlot() {
-        return newSlot;
-    }
-
-    public void setNewSlot(org.springframework.data.domain.Range<OffsetDateTime> newSlot) {
-        this.newSlot = newSlot;
-    }
-
-    public Long getActorId() {
-        return actorId;
-    }
-
-    public void setActorId(Long actorId) {
-        this.actorId = actorId;
+    public void setActor(AppUser actor) {
+        this.actor = actor;
     }
 
     public String getReason() {
@@ -113,11 +105,43 @@ public class BookingHistory {
         this.reason = reason;
     }
 
-    public Instant getOccurredAt() {
+    public OffsetDateTime getOccurredAt() {
         return occurredAt;
     }
 
-    public void setOccurredAt(Instant occurredAt) {
+    public void setOccurredAt(OffsetDateTime occurredAt) {
         this.occurredAt = occurredAt;
+    }
+
+    public OffsetDateTime getPreviousStartAt() {
+        return previousStartAt;
+    }
+
+    public void setPreviousStartAt(OffsetDateTime previousStartAt) {
+        this.previousStartAt = previousStartAt;
+    }
+
+    public OffsetDateTime getPreviousEndAt() {
+        return previousEndAt;
+    }
+
+    public void setPreviousEndAt(OffsetDateTime previousEndAt) {
+        this.previousEndAt = previousEndAt;
+    }
+
+    public OffsetDateTime getNewStartAt() {
+        return newStartAt;
+    }
+
+    public void setNewStartAt(OffsetDateTime newStartAt) {
+        this.newStartAt = newStartAt;
+    }
+
+    public OffsetDateTime getNewEndAt() {
+        return newEndAt;
+    }
+
+    public void setNewEndAt(OffsetDateTime newEndAt) {
+        this.newEndAt = newEndAt;
     }
 }

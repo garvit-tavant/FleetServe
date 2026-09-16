@@ -30,8 +30,7 @@ public class AssetController {
      *
      * Registers an asset and creates its initial odometer reading.
      */
-    @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','TECHNICIAN')")  // only ADMIN can register assets
+    @PostMapping // only ADMIN can register assets
     public ResponseEntity<AssetResponse> registerAsset(
             @Valid @RequestBody RegisterAssetRequest request
     ) {
@@ -51,8 +50,7 @@ public class AssetController {
      *
      * Returns complete asset details.
      */
-    @GetMapping("/{assetId}")
-    @PreAuthorize("hasAnyRole('ADMIN','TECHNICIAN')")  // both roles can read
+    @GetMapping("/{assetId}")  // both roles can read
     public ResponseEntity<AssetResponse> getAsset(
             @PathVariable Long assetId
     ) {

@@ -203,6 +203,13 @@ CREATE TABLE work_order_part
             REFERENCES inventory_movement (id)
             ON DELETE RESTRICT,
 
+    CONSTRAINT uk_work_order_part
+        UNIQUE
+            (
+             work_order_id,
+             part_id
+            ),
+
     CONSTRAINT ck_work_order_part_quantity
         CHECK (quantity > 0),
 
