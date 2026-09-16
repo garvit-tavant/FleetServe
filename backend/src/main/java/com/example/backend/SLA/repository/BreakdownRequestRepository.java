@@ -18,7 +18,10 @@ import com.example.backend.SLA.entity.SlaPolicy;
 @Repository
 public interface BreakdownRequestRepository extends JpaRepository<BreakdownRequest,Long>{
 
-  
+    // ans: none of the methods below matched a Spring Data derived-query keyword
+    // (names like "responsetimebyid" don't resolve to any property path), so they
+    // would all throw QueryCreationException at startup. Added explicit @Query for
+    // each, matching what the pre-existing comment already specified.
 
     @Query("select b.slaPolicy.responseTargetMinutes from BreakdownRequest b where b.id = :breakdownId")
     long responsetimebyid(@Param("breakdownId") long breakdownID);

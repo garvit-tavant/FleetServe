@@ -1,6 +1,5 @@
 package com.example.backend.ExecutionService.entity;
 
-import com.example.backend.AssetManagamentService.entity.Asset;
 import com.example.backend.ExecutionService.status.WorkOrderStatus;
 import jakarta.persistence.*;
 
