@@ -1,5 +1,6 @@
 package com.example.backend.CapacityAndSchedulingService.entity;
 
+import com.example.backend.ExecutionService.entity.Booking;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -44,6 +45,12 @@ public class Bay {
     private List<BayCapability> capabilities =
             new ArrayList<>();
 
+    @OneToMany(
+            mappedBy = "bay",
+            fetch = FetchType.LAZY
+    )
+    private List<Booking> bookings = new ArrayList<>();
+
     public Bay() {
     }
 
@@ -87,5 +94,29 @@ public class Bay {
             List<BayCapability> capabilities
     ) {
         this.capabilities = capabilities;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Boolean getActive() {
+        return isActive;
+    }
+
+    public void setActive(Boolean active) {
+        isActive = active;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    public List<Booking> getBookings() {
+        return bookings;
+    }
+
+    public void setBookings(List<Booking> bookings) {
+        this.bookings = bookings;
     }
 }

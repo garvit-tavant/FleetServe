@@ -50,10 +50,10 @@ public class SlaCheckpoint {
     // Breach flags only ever apply to corrective jobs, since SLA targets live
     // on breakdown_request.sla_policy_id. For preventive jobs they stay FALSE.
     @Column(name = "response_breach")
-    private Boolean responseBreach = Boolean.FALSE;  //
+    private boolean responseBreach = Boolean.FALSE;  //
 
     @Column(name = "resolution_breach")
-    private Boolean resolutionBreach = Boolean.FALSE;
+    private boolean resolutionBreach = Boolean.FALSE;
 
     // Precomputed running total of all *closed* awaiting-parts/approval pauses,
     // in minutes (per whatever calendar basis was applied at close time).

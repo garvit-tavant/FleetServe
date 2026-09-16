@@ -1,12 +1,15 @@
 package com.example.backend.SLA.repository;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import com.example.backend.SLA.dto.BreakdownPriority;
 import com.example.backend.SLA.entity.BreakdownRequest;
@@ -34,10 +37,7 @@ public interface BreakdownRequestRepository extends JpaRepository<BreakdownReque
     @Query("select b.reportedAt from BreakdownRequest b where b.id = :breakdownId")
     OffsetDateTime requestraisedtimebyid(@Param("breakdownId") long breakdownID);
 
-    @Query("select b.priority from BreakdownRequest b where b.id = :breakdownId")
-    String prioritybyid(@Param("breakdownId") long breakdownID);
-
-    @Query("select b.id, b.booking.id from BreakdownRequest b where b.status not in ('COMPLETED', 'CANCELED')")
+    @Query("select b.id, b.booking.id from BreakdownRequest b where b.status not in ('RESOLVED', 'CANCELLED')")
     List<Long[]> requestsnothandleded();
 
     // Used by WorkOrderServiceImpl to resolve which breakdown_request (and
@@ -53,4 +53,20 @@ public interface BreakdownRequestRepository extends JpaRepository<BreakdownReque
 
     @Query("SELECT br.priority FROM BreakdownRequest br WHERE br.id = :id")
     BreakdownPriority priorityById(@Param("id") Long id);
+
+    List<BreakdownRequest> findByPriority(
+            BreakdownPriority priority);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+        @Query("""
+    SELECT br
+    FROM BreakdownRequest br
+    JOIN FETCH br.asset a
+    JOIN FETCH a.homeDepot d
+    JOIN FETCH br.slaPolicy sp
+    WHERE br.id = :breakdownRequestId
+    """)
+    Optional<BreakdownRequest> findByIdForCorrectiveBooking(
+    @Param("breakdownRequestId")
+            Long breakdownRequestId);
 }

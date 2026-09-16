@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+public class JwtAuthenticationFilter /*extends OncePerRequestFilter*/ {
     
     private final JwtService jwtService;
     private final AppUserDetailsService appUserDetailsService;
@@ -31,16 +31,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.appUserDetailsService = appUserDetailsService;
     }
 
-    @Override
+ //   @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
         return path.startsWith("/api/auth/"); // skip JWT filter entirely for auth endpoints
     }
 
-    @Override
+   // @Override
     protected void doFilterInternal (HttpServletRequest request , HttpServletResponse response , FilterChain filterChain) throws ServletException, IOException {
         String header = request.getHeader("Authorization"); // auth token bearer
-
+        System.out.println("fattgaya iski maa ka");
         if(header == null || !header.startsWith("Bearer ")) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing or invalid Authorization header");
             return ;    

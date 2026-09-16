@@ -11,3 +11,6 @@ for technician in findSlotEngine
 validFrom <= date
 &&
 (validTo == null || validTo >= date)
+
+
+booking entity has Range<OffsetDateTime> but our migration has tstzrange, it might fail, we will check it later

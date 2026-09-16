@@ -2,7 +2,7 @@ package com.example.backend.AssetManagamentService.controller;
 
 import com.example.backend.AssetManagamentService.dto.duemaintenance.DueMaintenanceResponse;
 import com.example.backend.AssetManagamentService.service.DueMaintenanceService;
-import com.example.backend.ExecutionService.dto.PreventiveBookingResponse;
+import com.example.backend.ExecutionService.dto.booking.PreventiveBookingResponse;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

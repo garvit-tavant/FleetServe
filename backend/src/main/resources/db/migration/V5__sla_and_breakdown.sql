@@ -2,8 +2,8 @@ CREATE TABLE sla_policy
 (
     id                        BIGINT GENERATED ALWAYS AS IDENTITY,
     priority                  VARCHAR(20) NOT NULL,
-    response_target_minutes   INTEGER     NOT NULL,
-    resolution_target_minutes INTEGER     NOT NULL,
+    response_target_minutes   BIGINT     NOT NULL,
+    resolution_target_minutes BIGINT    NOT NULL,
     calendar_basis            VARCHAR(20) NOT NULL,
     effective_from            DATE        NOT NULL,
     effective_to              DATE,
@@ -53,6 +53,7 @@ CREATE TABLE breakdown_request
     description    VARCHAR(2000) NOT NULL,
     status         VARCHAR(30)  NOT NULL DEFAULT 'REPORTED',
     sla_policy_id  BIGINT       NOT NULL,
+    version BIGINT NOT NULL DEFAULT 0,
     -- No resulting_booking_id here: the breakdown <-> booking link is owned by
     -- booking.breakdown_request_id (see V6).
 
@@ -90,9 +91,7 @@ CREATE TABLE breakdown_request
             status IN
             (
              'REPORTED',
-             'TRIAGED',
              'BOOKED',
-             'IN_PROGRESS',
              'RESOLVED',
              'CANCELLED'
                 )

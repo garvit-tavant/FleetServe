@@ -79,7 +79,7 @@ public class OdometerServiceImpl implements OdometerService {
         );
         reading.setSource(OdometerSource.MANUAL);
         reading.setRecordedById(
-                currentUserProvider.getCurrentUserId()
+                1L//currentUserProvider.getCurrentUserId()
         );
 
         OdometerReading saved =

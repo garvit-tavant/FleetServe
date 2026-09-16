@@ -1,5 +1,6 @@
 package com.example.backend.SLA.repository;
 
+import com.example.backend.SLA.dto.BreakdownStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -101,16 +102,20 @@ int resolveAwaitingIfOpen(@Param("bookingId") Long bookingId,
      * them would mix two different populations into one percentage.
      */
     @Query("""
-        SELECT sc.booking.breakdownRequest.slaPolicy.priority AS priority,
-        COUNT(sc.booking.breakdownRequest.id) AS evaluatedCases,
-        (COUNT(sc.booking.breakdownRequest.id) - SUM(CASE WHEN sc.responseBreach = true THEN 1 ELSE 0 END)) AS compliantCases,
-        ((COUNT(sc.booking.breakdownRequest.id) - SUM(CASE WHEN sc.responseBreach = true THEN 1 ELSE 0 END)) * 100.0 / COUNT(sc.booking.breakdownRequest.id)) AS compliancePercent
-        FROM SlaCheckpoint sc
-        WHERE sc.booking.breakdownRequest IS NOT NULL
-          AND sc.booking.breakdownRequest.status = 'COMPLETED'
-        GROUP BY sc.booking.breakdownRequest.slaPolicy.priority
-        ORDER BY sc.booking.breakdownRequest.slaPolicy.priority
-        """)
-    List<SlaComplianceReport> findSlaComplianceMetrics();
+SELECT new com.example.backend.SLA.dto.SlaComplianceReport(
+    sc.booking.breakdownRequest.slaPolicy.priority,
+    COUNT(sc.booking.breakdownRequest.id),
+    SUM(CASE WHEN sc.responseBreach = FALSE THEN 1 ELSE 0 END),
+    (SUM(CASE WHEN sc.responseBreach = FALSE THEN 1 ELSE 0 END) * 100.0)
+        / COUNT(sc.booking.breakdownRequest.id)
+)
+FROM SlaCheckpoint sc
+WHERE sc.booking.breakdownRequest IS NOT NULL
+  AND sc.booking.breakdownRequest.status = :status
+GROUP BY sc.booking.breakdownRequest.slaPolicy.priority
+ORDER BY sc.booking.breakdownRequest.slaPolicy.priority
+""")
+    List<SlaComplianceReport> findSlaComplianceMetrics(
+            @Param("status") BreakdownStatus status);
 
 }

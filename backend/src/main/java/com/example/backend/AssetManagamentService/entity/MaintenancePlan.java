@@ -1,8 +1,11 @@
 package com.example.backend.AssetManagamentService.entity;
 
+import com.example.backend.ExecutionService.entity.Booking;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "maintenance_plan")
@@ -29,6 +32,12 @@ public class MaintenancePlan {
 
     @Column(name = "required_capability_code", length = 50)
     private String requiredCapabilityCode;
+
+    @OneToMany(
+            mappedBy = "maintenancePlan",
+            fetch = FetchType.LAZY
+    )
+    private List<Booking> bookings = new ArrayList<>();
 
     public MaintenancePlan() {
     }
@@ -87,5 +96,13 @@ public class MaintenancePlan {
 
     public void setRequiredCapabilityCode(String requiredCapabilityCode) {
         this.requiredCapabilityCode = requiredCapabilityCode;
+    }
+
+    public List<Booking> getBookings() {
+        return bookings;
+    }
+
+    public void setBookings(List<Booking> bookings) {
+        this.bookings = bookings;
     }
 }

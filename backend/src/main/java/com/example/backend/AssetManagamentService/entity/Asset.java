@@ -2,10 +2,13 @@ package com.example.backend.AssetManagamentService.entity;
 
 import com.example.backend.AssetManagamentService.status.AssetStatus;
 import com.example.backend.CapacityAndSchedulingService.entity.Depot;
+import com.example.backend.ExecutionService.entity.Booking;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "asset")
@@ -43,6 +46,12 @@ public class Asset {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private AssetStatus status;
+
+    @OneToMany(
+            mappedBy = "asset",
+            fetch = FetchType.LAZY
+    )
+    private List<Booking> bookings = new ArrayList<>();
 
     @Version
     private Long version;
@@ -112,5 +121,13 @@ public class Asset {
 
     public void setHomeDepot(Depot homeDepot) {
         this.homeDepot = homeDepot;
+    }
+
+    public List<Booking> getBookings() {
+        return bookings;
+    }
+
+    public void setBookings(List<Booking> bookings) {
+        this.bookings = bookings;
     }
 }

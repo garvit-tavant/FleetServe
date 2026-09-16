@@ -2,7 +2,7 @@ package com.example.backend.AssetManagamentService.service;
 
 
 import com.example.backend.AssetManagamentService.dto.duemaintenance.DueMaintenanceResponse;
-import com.example.backend.ExecutionService.dto.PreventiveBookingResponse;
+import com.example.backend.ExecutionService.dto.booking.PreventiveBookingResponse;
 
 import java.util.List;
 

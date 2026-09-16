@@ -1,11 +1,17 @@
 package com.example.backend.ExecutionService.repository;
 
-import com.example.backend.ExecutionService.entity.BookingHistory;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface BookingHistoryRepository extends JpaRepository<BookingHistory, Long> {
+import com.example.backend.ExecutionService.entity.BookingHistory;
 
+@Repository
+public interface BookingHistoryRepository
+        extends JpaRepository<BookingHistory, Long> {
+
+    List<BookingHistory> findByBooking_IdOrderByOccurredAtDesc(
+            Long bookingId
+    );
 }

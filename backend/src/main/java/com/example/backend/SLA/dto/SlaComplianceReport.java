@@ -1,25 +1,27 @@
 package com.example.backend.SLA.dto;
 
 public class SlaComplianceReport {
-    private String priority;
+
+    private BreakdownPriority priority;
+
     private Long evaluatedCases;
+
     private Long compliantCases;
+
     private Double compliancePercent;
 
-    public SlaComplianceReport(String priority, Long evaluatedCases, Long compliantCases, Double compliancePercent) {
+    public SlaComplianceReport(BreakdownPriority priority, Long evaluatedCases, Long compliantCases, Double compliancePercent) {
         this.priority = priority;
         this.evaluatedCases = evaluatedCases;
         this.compliantCases = compliantCases;
         this.compliancePercent = compliancePercent;
     }
 
-    // Getters and setters
-
-    public String getPriority() {
+    public BreakdownPriority getPriority() {
         return priority;
     }
 
-    public void setPriority(String priority) {
+    public void setPriority(BreakdownPriority priority) {
         this.priority = priority;
     }
 

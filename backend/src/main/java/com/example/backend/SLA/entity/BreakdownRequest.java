@@ -1,17 +1,6 @@
 package com.example.backend.SLA.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.time.OffsetDateTime;
 
@@ -75,6 +64,10 @@ public class BreakdownRequest {
 
     @OneToOne(mappedBy = "breakdownRequest", fetch = FetchType.LAZY, optional = true) // 1 to 0/1 mapping
     private Booking booking;
+
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
 
     // getters and setters
 
@@ -156,6 +149,14 @@ public class BreakdownRequest {
 
     public void setBooking(Booking booking) {
         this.booking = booking;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }
 

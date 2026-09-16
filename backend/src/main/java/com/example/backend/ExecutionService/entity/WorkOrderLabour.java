@@ -1,82 +1,89 @@
 package com.example.backend.ExecutionService.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-
 import java.math.BigDecimal;
+
+import com.example.backend.CapacityAndSchedulingService.entity.Technician;
+
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "work_order_labour")
 public class WorkOrderLabour {
-    /*
-     id             BIGINT GENERATED ALWAYS AS IDENTITY,
-    work_order_id  BIGINT        NOT NULL,
-    technician_id  BIGINT        NOT NULL,
-    hours          NUMERIC(5,2)  NOT NULL,
-    rate_applied   NUMERIC(12,2) NOT NULL,
-    */
-   @Id
-   @GeneratedValue(strategy = GenerationType.IDENTITY)
-   private Long id;
 
-   @ManyToOne
-   @JoinColumn(name = "work_order_id", nullable = false)
-   private WorkOrder workOrder;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-   @Column(name = "technician_id", nullable = false)
-   private Long technicianId;
+    @ManyToOne(
+            fetch = FetchType.LAZY,
+            optional = false)
+    @JoinColumn(
+            name = "work_order_id",
+            nullable = false)
+    private WorkOrder workOrder;
 
-   @Column(name = "hours", nullable = false, precision = 5, scale = 2)
-   private BigDecimal hours;
+    @ManyToOne(
+            fetch = FetchType.LAZY,
+            optional = false)
+    @JoinColumn(
+            name = "technician_id",
+            nullable = false)
+    private Technician technician;
 
-   @Column(name = "rate_applied", nullable = false, precision = 12, scale = 2)
-   private BigDecimal rateApplied;
+    @Column(
+            name = "hours",
+            nullable = false,
+            precision = 5,
+            scale = 2)
+    private BigDecimal hours;
 
-   // getters and setters
+    @Column(
+            name = "rate_applied",
+            nullable = false,
+            precision = 12,
+            scale = 2)
+    private BigDecimal rateApplied;
 
-   public Long getId() {
-       return id;
-   }
+    // getters setters
 
-   public void setId(Long id) {
-       this.id = id;
-   }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public WorkOrder getWorkOrder() {
-         return workOrder;
+        return workOrder;
     }
 
     public void setWorkOrder(WorkOrder workOrder) {
         this.workOrder = workOrder;
     }
 
-   public Long getTechnicianId() {
-       return technicianId;
-   }
+    public Technician getTechnician() {
+        return technician;
+    }
 
-   public void setTechnicianId(Long technicianId) {
-       this.technicianId = technicianId;
-   }
+    public void setTechnician(Technician technician) {
+        this.technician = technician;
+    }
 
-   public BigDecimal getHours() {
-       return hours;
-   }
+    public BigDecimal getHours() {
+        return hours;
+    }
 
-   public void setHours(BigDecimal hours) {
-       this.hours = hours;
-   }
+    public void setHours(BigDecimal hours) {
+        this.hours = hours;
+    }
 
-   public BigDecimal getRateApplied() {
-       return rateApplied;
-   }
+    public BigDecimal getRateApplied() {
+        return rateApplied;
+    }
 
-   public void setRateApplied(BigDecimal rateApplied) {
-       this.rateApplied = rateApplied;
-   }
+    public void setRateApplied(BigDecimal rateApplied) {
+        this.rateApplied = rateApplied;
+    }
 }

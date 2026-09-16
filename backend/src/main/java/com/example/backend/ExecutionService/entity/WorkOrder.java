@@ -32,26 +32,21 @@ public class WorkOrder {
     @Column(name = "work_order_number", nullable = false)
     private String workOrderNumber;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "booking_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY,optional = false)
+    @JoinColumn(name = "booking_id", nullable = false,unique=true)
     private Booking booking;
-
-    @Column(name = "asset_id", nullable = false)
-    private Long assetId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
     private WorkOrderStatus status;
 
     @Column(
-            name = "started_at",
-            columnDefinition = "TIME WITH TIME ZONE"
+            name = "started_at"
     )
     private OffsetDateTime startedAt;
 
     @Column(
-            name = "completed_at",
-            columnDefinition = "TIME WITH TIME ZONE"
+            name = "completed_at"
     )
     private OffsetDateTime completedAt;
 
@@ -61,7 +56,7 @@ public class WorkOrder {
     @Column(name = "total_cost", nullable = false , precision = 12, scale = 2)
     private BigDecimal totalCost;
 
-    @Column(name = "idempotency_key")
+    @Column(name = "idempotency_key",unique = true,length = 100)
     private String idempotencyKey;
 
     @Version
@@ -98,14 +93,6 @@ public class WorkOrder {
 
     public void setBooking(Booking booking) {
         this.booking = booking;
-    }
-
-    public Long getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(Long assetId) {
-        this.assetId = assetId;
     }
 
     public OffsetDateTime getStartedAt() {
