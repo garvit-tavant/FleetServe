@@ -42,14 +42,46 @@ public class WorkingHoursSlaTimeCalculationStrategy implements SlaTimeCalculatio
 
     @Override
     public long calculateElapsedTime(OffsetDateTime start, OffsetDateTime end, long workshopID) {
+        LocalTime shiftStart = workingCalendarRepository.findopentimebywokrshopID(workshopID);
+        LocalTime shiftEnd = workingCalendarRepository.findbyclosetimebyworkshopID(workshopID);
+
+        // Only need a count of holidays strictly between start/end dates for
+        // clamping — start/end dates are assumed to never be holidays.
+        long holidayCount = holidayRepository
+                .countHoldidayinbetween(workshopID, start.toLocalDate(), end.toLocalDate());
+
+        return calculateElapsedTimeInternal(start, end, shiftStart, shiftEnd, holidayCount);
+    }
+
+    /**
+     * Batch-friendly overload: caller pre-fetches shiftStart/shiftEnd/holidayCount
+     * once (e.g. per distinct workshop, across many rows) instead of this method
+     * hitting workingCalendarRepository/holidayRepository per call. Used by
+     * SlaService.MeanTimeToRepair() to avoid an N+1 query pattern when computing
+     * elapsed time for many completed work orders at once.
+     */
+    @Override
+    public long calculateElapsedTime(OffsetDateTime start, OffsetDateTime end, long workshopID,
+                                      LocalTime shiftStart, LocalTime shiftEnd, long holidayCount) {
+        return calculateElapsedTimeInternal(start, end, shiftStart, shiftEnd, holidayCount);
+    }
+
+    /**
+     * we are assuming start and end dates are never the holidays — simplifies
+     * clamping since we never need to special-case "what if the FIRST or LAST
+     * day of the repair window is itself a holiday". We only ever need the
+     * COUNT of holidays strictly between the start/end dates, not which
+     * specific dates they are.
+     */
+    private long calculateElapsedTimeInternal(OffsetDateTime start, OffsetDateTime end,
+                                               LocalTime shiftStart, LocalTime shiftEnd,
+                                               long holidayCount) {
         LocalDate dateStart = start.toLocalDate();
         LocalDate dateEnd = end.toLocalDate();
 
         LocalTime timeStart = start.toLocalTime();
         LocalTime timeEnd = end.toLocalTime();
 
-        LocalTime shiftStart = workingCalendarRepository.findopentimebywokrshopID(workshopID);
-        LocalTime shiftEnd = workingCalendarRepository.findbyclosetimebyworkshopID(workshopID);
         long shiftMinutes = countMinutes(shiftStart, shiftEnd);
 
         // Same-day case: clamp both times to shift window and return direct difference
@@ -62,14 +94,14 @@ public class WorkingHoursSlaTimeCalculationStrategy implements SlaTimeCalculatio
         // Multi-day case:
         // Day 1 contribution: minutes from startTime to end-of-shift
         // Day N contribution: minutes from start-of-shift to endTime
-        // Middle days: full shift minutes per day, minus holidays
-
-        long countHolidays = holidayRepository.countHoldidayinbetween(workshopID, dateStart, dateEnd);
+        // Middle days: full shift minutes per day, minus holidays (start/end
+        // dates themselves are assumed never to be holidays, so holidayCount
+        // only reflects dates strictly between dateStart and dateEnd)
         long dayCount = countDays(dateStart, dateEnd);
 
         long day1Minutes = clampMinutes(countMinutes(timeStart, shiftEnd), shiftMinutes);
         long dayNMinutes = clampMinutes(countMinutes(shiftStart, timeEnd), shiftMinutes);
-        long middleDays = Math.max(0, dayCount - 1 - countHolidays);
+        long middleDays = Math.max(0, dayCount - 1 - holidayCount);
 
         return day1Minutes + dayNMinutes + middleDays * shiftMinutes;
     }

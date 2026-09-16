@@ -17,6 +17,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 
@@ -37,11 +38,11 @@ public class JwtService {
 
     public JwtService(@Value("${jwt.secret}") String secret , @Value("${jwt.expiration-ms}") long expirationMs){  
    //  public JwtService(){
-      //  this.signingKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secret.getBytes()));
-      this.signingKey = Jwts.SIG.HS256.key().build();  
+        this.signingKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
+      //this.signingKey = Jwts.SIG.HS256.key().build();  
       this.expirationMs = expirationms;
-    
-      //System.out.println(secret + "   "+expirationMs);
+
+      //System.out.println(secret + "   "+expirationMs+" "+);
 
     }
     

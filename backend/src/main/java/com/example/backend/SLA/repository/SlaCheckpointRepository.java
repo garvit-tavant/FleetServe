@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Optional;
 
 import com.example.backend.SLA.dto.SlaComplianceReport;
+import com.example.backend.SLA.dto.BookingAwaitingMinutesRow;
+
 import com.example.backend.SLA.entity.SlaCheckpoint;
 
 import jakarta.transaction.Transactional;
@@ -26,6 +28,10 @@ import jakarta.transaction.Transactional;
 @Repository
 public interface SlaCheckpointRepository extends JpaRepository<SlaCheckpoint, Long> {
 
+    /**
+     * returns the booking id and accumulated awaiting minutes for the completed work orders
+     */
+ 
 
 
     @Query("select c.responseBreach from SlaCheckpoint c where c.booking.id = :bookingId")
@@ -117,5 +123,20 @@ ORDER BY sc.booking.breakdownRequest.slaPolicy.priority
 """)
     List<SlaComplianceReport> findSlaComplianceMetrics(
             @Param("status") BreakdownStatus status);
+
+
+    /**
+     * Bulk fetch of accumulated awaiting-parts minutes, keyed by booking id,
+     * for the given set of bookings. Used by SlaService.MeanTimeToRepair() to
+     * avoid one query per booking (N+1) when computing MTTR across many
+     * completed work orders at once.
+     */
+    @Query("""
+            select new com.example.backend.SLA.dto.BookingAwaitingMinutesRow(
+                sc.booking.id, sc.accumulatedAwaitingMinutes)
+            from SlaCheckpoint sc
+            where sc.booking.id in :bookingIds
+            """)
+    List<BookingAwaitingMinutesRow> findAccumulatedAwaitingMinutesForBookingIds(@Param("bookingIds") List<Long> bookingIds);
 
 }

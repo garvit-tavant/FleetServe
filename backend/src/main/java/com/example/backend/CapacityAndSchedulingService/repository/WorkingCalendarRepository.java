@@ -42,4 +42,9 @@ public interface WorkingCalendarRepository
     LocalTime findbyclosetimebyworkshopID(@Param("workshopId") long workshopID);
 
     List<WorkingCalendar> findByWorkshop_IdOrderByDayOfWeekAsc(Long workshopId);
+
+    // Bulk fetch for multiple workshops in a single query (avoids N+1 when batching,
+    // e.g. in SlaService.MeanTimeToRepair()). Same "same hours every day" assumption
+    // as above applies - callers should just take the first row per workshopId.
+    List<WorkingCalendar> findByWorkshop_IdInOrderByWorkshop_IdAscDayOfWeekAsc(Collection<Long> workshopIds);
 }
