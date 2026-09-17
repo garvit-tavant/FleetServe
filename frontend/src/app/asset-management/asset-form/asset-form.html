@@ -1,1 +1,73 @@
-<p>asset-form works!</p>
+<div class="asset-form-container">
+  <h1>Register New Asset</h1>
+
+  @if (errorMessage()) {
+    <p class="asset-form-error">{{ errorMessage() }}</p>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="asset-form">
+    <mat-form-field appearance="outline">
+      <mat-label>VIN</mat-label>
+      <input matInput formControlName="vin" />
+      @if (form.get('vin')?.hasError('required') && form.get('vin')?.touched) {
+        <mat-error>VIN is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Asset Class</mat-label>
+      <mat-select formControlName="assetClassId">
+        @for (assetClass of assetClasses(); track assetClass.id) {
+          <mat-option [value]="assetClass.id">{{ assetClass.code }} - {{ assetClass.description }}</mat-option>
+        }
+      </mat-select>
+      @if (form.get('assetClassId')?.hasError('required') && form.get('assetClassId')?.touched) {
+        <mat-error>Asset class is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Home Depot</mat-label>
+      <mat-select formControlName="homeDepotId">
+        @for (depot of depots(); track depot.id) {
+          <mat-option [value]="depot.id">{{ depot.code }} - {{ depot.region }}</mat-option>
+        }
+      </mat-select>
+      @if (form.get('homeDepotId')?.hasError('required') && form.get('homeDepotId')?.touched) {
+        <mat-error>Home depot is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Acquisition Date</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="acquisitionDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+      @if (form.get('acquisitionDate')?.hasError('required') && form.get('acquisitionDate')?.touched) {
+        <mat-error>Acquisition date is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Acquisition Odometer (km)</mat-label>
+      <input matInput type="number" formControlName="acquisitionOdometerKm" />
+      @if (form.get('acquisitionOdometerKm')?.hasError('required') && form.get('acquisitionOdometerKm')?.touched) {
+        <mat-error>Odometer reading is required.</mat-error>
+      }
+      @if (form.get('acquisitionOdometerKm')?.hasError('min')) {
+        <mat-error>Odometer reading must be 0 or greater.</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="asset-form-actions">
+      <button mat-button type="button" routerLink="/assets">Cancel</button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="submitting()">
+        @if (submitting()) {
+          <mat-spinner diameter="20"></mat-spinner>
+        } @else {
+          Register Asset
+        }
+      </button>
+    </div>
+  </form>
+</div>

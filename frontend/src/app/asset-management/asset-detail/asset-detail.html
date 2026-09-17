@@ -1,1 +1,47 @@
-<p>asset-detail works!</p>
+<div class="asset-detail-container">
+  @if (loading()) {
+    <div class="asset-detail-spinner">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else if (errorMessage()) {
+    <p class="asset-detail-error">{{ errorMessage() }}</p>
+  } @else if (asset(); as a) {
+    <mat-card class="asset-detail-card">
+      <mat-card-header>
+        <mat-card-title>{{ a.vin }}</mat-card-title>
+        <mat-card-subtitle>
+          <mat-chip [color]="chipColor(a.status)" selected>{{ a.status }}</mat-chip>
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="asset-detail-field">
+          <span class="label">Asset Class:</span>
+          <span>{{ a.assetClassCode }}</span>
+        </div>
+        <div class="asset-detail-field">
+          <span class="label">Home Depot:</span>
+          <span>{{ a.homeDepotCode }}</span>
+        </div>
+        <div class="asset-detail-field">
+          <span class="label">Acquisition Date:</span>
+          <span>{{ a.acquisitionDate }}</span>
+        </div>
+        <div class="asset-detail-field">
+          <span class="label">Acquisition Odometer:</span>
+          <span>{{ a.acquisitionOdometerKm }} km</span>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-button routerLink="/assets">Back to Assets</button>
+        @if (a.status !== 'RETIRED') {
+          <button mat-raised-button color="warn" (click)="openRetireDialog()">Retire</button>
+        }
+        @if (a.status === 'RETIRED') {
+          <button mat-raised-button color="primary" (click)="openReinstateDialog()">Reinstate</button>
+        }
+      </mat-card-actions>
+    </mat-card>
+  }
+</div>

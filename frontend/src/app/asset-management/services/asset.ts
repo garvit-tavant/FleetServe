@@ -53,10 +53,10 @@ export class AssetService {
   }
 
   retire(id: number, payload: ReasonRequest): Observable<void> {
-    return this.http.post<void>(`${environment.apiUrl}/assets/${id}/retire`, payload);
+    return this.http.patch<void>(`${environment.apiUrl}/assets/${id}/retire`, payload);
   }
 
   reinstate(id: number, payload: ReasonRequest): Observable<void> {
-    return this.http.post<void>(`${environment.apiUrl}/assets/${id}/reinstate`, payload);
+    return this.http.patch<void>(`${environment.apiUrl}/assets/${id}/reinstate`, payload);
   }
 }

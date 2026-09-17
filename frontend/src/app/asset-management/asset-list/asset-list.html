@@ -1,1 +1,41 @@
-<p>asset-list works!</p>
+<div class="asset-list-container">
+  <div class="asset-list-header">
+    <h1>Assets</h1>
+    <button mat-raised-button color="primary" routerLink="/assets/new">
+      <mat-icon>add</mat-icon>
+      Register New Asset
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="asset-list-spinner">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else if (errorMessage()) {
+    <p class="asset-list-error">{{ errorMessage() }}</p>
+  } @else if (assets().length === 0) {
+    <p class="asset-list-empty">No assets found.</p>
+  } @else {
+    <table mat-table [dataSource]="assets()" class="mat-elevation-z2 asset-list-table">
+      <ng-container matColumnDef="vin">
+        <th mat-header-cell *matHeaderCellDef>VIN</th>
+        <td mat-cell *matCellDef="let asset">{{ asset.vin }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="assetClassCode">
+        <th mat-header-cell *matHeaderCellDef>Asset Class</th>
+        <td mat-cell *matCellDef="let asset">{{ asset.assetClassCode }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let asset">
+          <mat-chip [color]="chipColor(asset.status)" selected>{{ asset.status }}</mat-chip>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onRowClick(row)" class="asset-row"></tr>
+    </table>
+  }
+</div>

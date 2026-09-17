@@ -1,0 +1,28 @@
+.asset-detail-container {
+  padding: 24px;
+}
+
+.asset-detail-card {
+  max-width: 480px;
+}
+
+.asset-detail-field {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.asset-detail-field .label {
+  font-weight: 600;
+  min-width: 160px;
+}
+
+.asset-detail-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 32px;
+}
+
+.asset-detail-error {
+  color: #d32f2f;
+}
