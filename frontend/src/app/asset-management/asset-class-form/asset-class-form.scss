@@ -1,0 +1,21 @@
+.asset-class-form-container {
+  padding: 24px;
+  max-width: 480px;
+}
+
+.asset-class-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.asset-class-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.asset-class-form-error {
+  color: #d32f2f;
+}

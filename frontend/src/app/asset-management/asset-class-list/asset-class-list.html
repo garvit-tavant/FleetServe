@@ -1,0 +1,32 @@
+<div class="asset-class-list-container">
+  <div class="asset-class-list-header">
+    <h1>Asset Classes</h1>
+    <button mat-raised-button color="primary" routerLink="/asset-classes/new">
+      <mat-icon>add</mat-icon>
+      Add Asset Class
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="asset-class-list-spinner">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else if (assetClasses().length === 0) {
+    <p class="asset-class-list-empty">No asset classes found.</p>
+  } @else {
+    <table mat-table [dataSource]="assetClasses()" class="mat-elevation-z2 asset-class-list-table">
+      <ng-container matColumnDef="code">
+        <th mat-header-cell *matHeaderCellDef>Code</th>
+        <td mat-cell *matCellDef="let assetClass">{{ assetClass.code }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="description">
+        <th mat-header-cell *matHeaderCellDef>Description</th>
+        <td mat-cell *matCellDef="let assetClass">{{ assetClass.description }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onRowClick(row)" class="asset-class-row"></tr>
+    </table>
+  }
+</div>

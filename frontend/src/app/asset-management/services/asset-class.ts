@@ -16,4 +16,12 @@ export class AssetClassService {
   getAll(): Observable<AssetClassResponse[]> {
     return this.http.get<AssetClassResponse[]>(`${environment.apiUrl}/asset-classes`);
   }
+
+  getById(id: number): Observable<AssetClassResponse> {
+    return this.http.get<AssetClassResponse>(`${environment.apiUrl}/asset-classes/${id}`);
+  }
+
+  create(payload: { code: string; description: string }): Observable<AssetClassResponse> {
+    return this.http.post<AssetClassResponse>(`${environment.apiUrl}/asset-classes`, payload);
+  }
 }

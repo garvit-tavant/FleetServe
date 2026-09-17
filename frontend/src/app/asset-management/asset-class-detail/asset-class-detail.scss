@@ -1,0 +1,28 @@
+.asset-class-detail-container {
+  padding: 24px;
+}
+
+.asset-class-detail-card {
+  max-width: 480px;
+}
+
+.asset-class-detail-field {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.asset-class-detail-field .label {
+  font-weight: 600;
+  min-width: 120px;
+}
+
+.asset-class-detail-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 32px;
+}
+
+.asset-class-detail-error {
+  color: #d32f2f;
+}

@@ -6,6 +6,9 @@ import { Register } from './auth/register/register';
 import { AssetList } from './asset-management/asset-list/asset-list';
 import { AssetDetail } from './asset-management/asset-detail/asset-detail';
 import { AssetForm } from './asset-management/asset-form/asset-form';
+import { AssetClassList } from './asset-management/asset-class-list/asset-class-list';
+import { AssetClassDetail } from './asset-management/asset-class-detail/asset-class-detail';
+import { AssetClassForm } from './asset-management/asset-class-form/asset-class-form';
 import { DueMaintenanceList } from './due-maintenance/due-maintenance-list/due-maintenance-list';
 import { WorkshopList } from './scheduling/workshop-list/workshop-list';
 import { SlotCalendar } from './booking/slot-calendar/slot-calendar';
@@ -27,6 +30,9 @@ export const routes: Routes = [
       { path: 'assets', component: AssetList },
       { path: 'assets/new', component: AssetForm },
       { path: 'assets/:id', component: AssetDetail },
+      { path: 'asset-classes', component: AssetClassList },
+      { path: 'asset-classes/new', component: AssetClassForm },
+      { path: 'asset-classes/:id', component: AssetClassDetail },
       { path: 'due-maintenance', component: DueMaintenanceList },
       { path: 'workshops', component: WorkshopList },
       { path: 'bookings', component: SlotCalendar },

@@ -41,6 +41,7 @@ export class Layout {
   navItems: NavItem[] = [
     { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
     { label: 'Assets', path: '/assets', icon: 'directions_car' },
+    { label: 'Asset Classes', path: '/asset-classes', icon: 'category' },
     { label: 'Due Maintenance', path: '/due-maintenance', icon: 'build' },
     { label: 'Workshops', path: '/workshops', icon: 'engineering' },
     { label: 'Bookings', path: '/bookings', icon: 'event' },

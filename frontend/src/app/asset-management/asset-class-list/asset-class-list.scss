@@ -1,0 +1,32 @@
+.asset-class-list-container {
+  padding: 24px;
+}
+
+.asset-class-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.asset-class-list-table {
+  width: 100%;
+}
+
+.asset-class-row {
+  cursor: pointer;
+}
+
+.asset-class-row:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.asset-class-list-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 32px;
+}
+
+.asset-class-list-empty {
+  color: rgba(0, 0, 0, 0.6);
+}
