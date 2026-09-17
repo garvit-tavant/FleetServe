@@ -1,0 +1,57 @@
+<mat-sidenav-container class="h-screen">
+  <mat-sidenav
+    #sidenav
+    [mode]="isHandset() ? 'over' : 'side'"
+    [opened]="!isHandset() && sidenavOpened()"
+    class="w-64 bg-white"
+  >
+    <div class="p-4 border-b">
+      <h2 class="text-lg font-bold text-blue-700">FleetServe</h2>
+    </div>
+
+    <mat-nav-list>
+      @for (item of navItems; track item.path) {
+        <a
+          mat-list-item
+          [routerLink]="item.path"
+          routerLinkActive="bg-blue-50 text-blue-700 font-semibold"
+          (click)="isHandset() && sidenav.close()"
+          class="flex items-center gap-2"
+        >
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.label }}</span>
+        </a>
+      }
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar color="primary" class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        @if (isHandset()) {
+          <button mat-icon-button (click)="sidenav.toggle()">
+            <mat-icon>menu</mat-icon>
+          </button>
+        } @else {
+          <button mat-icon-button (click)="toggleSidenav()">
+            <mat-icon>menu</mat-icon>
+          </button>
+        }
+        <span class="text-lg font-semibold">FleetServe</span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        @if (currentUser(); as user) {
+          <span class="text-sm hidden sm:inline">{{ user.username }}</span>
+        }
+        <button mat-icon-button (click)="logout()" title="Logout">
+          <mat-icon>logout</mat-icon>
+        </button>
+      </div>
+    </mat-toolbar>
+
+    <main class="p-4">
+      <router-outlet></router-outlet>
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>
