@@ -1,1 +1,87 @@
-<p>due-maintenance-list works!</p>
+<div class="due-maintenance-container">
+  <div class="due-maintenance-header">
+    <h1>Due Maintenance</h1>
+  </div>
+
+  @if (lastBooking(); as b) {
+    <div class="booking-confirmation">
+      <mat-icon>check_circle</mat-icon>
+      <div>
+        Booking created: <a [routerLink]="['/work-orders', b.workOrderId]">{{ b.workOrderNumber }}</a>
+        scheduled {{ b.start | date: 'medium' }} &ndash; {{ b.end | date: 'shortTime' }}
+        (Workshop {{ b.workshopId }}, Bay {{ b.bayId }}, Technician {{ b.technicianId }})
+      </div>
+    </div>
+  }
+
+  @if (bookingError()) {
+    <p class="due-maintenance-error">{{ bookingError() }}</p>
+  }
+
+  @if (loading()) {
+    <div class="due-maintenance-spinner">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else if (errorMessage()) {
+    <p class="due-maintenance-error">{{ errorMessage() }}</p>
+  } @else if (items().length === 0) {
+    <p class="due-maintenance-empty">No assets are currently due for maintenance.</p>
+  } @else {
+    <table mat-table [dataSource]="items()" class="mat-elevation-z2 due-maintenance-table">
+      <ng-container matColumnDef="vin">
+        <th mat-header-cell *matHeaderCellDef>VIN</th>
+        <td mat-cell *matCellDef="let i">{{ i.vin }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="maintenancePlanCode">
+        <th mat-header-cell *matHeaderCellDef>Maintenance Plan</th>
+        <td mat-cell *matCellDef="let i">{{ i.maintenancePlanCode }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="currentOdometerKm">
+        <th mat-header-cell *matHeaderCellDef>Current Odometer (km)</th>
+        <td mat-cell *matCellDef="let i">{{ i.currentOdometerKm }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="nextDueKm">
+        <th mat-header-cell *matHeaderCellDef>Next Due (km)</th>
+        <td mat-cell *matCellDef="let i">{{ i.nextDueKm }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="nextDueDate">
+        <th mat-header-cell *matHeaderCellDef>Next Due Date</th>
+        <td mat-cell *matCellDef="let i">{{ i.nextDueDate | date: 'mediumDate' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="dueStatus">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let i">
+          <mat-chip [color]="i.dueStatus === 'OVERDUE' ? 'warn' : 'accent'" selected>
+            {{ i.dueStatus }}
+          </mat-chip>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let i">
+          <button
+            mat-raised-button
+            color="primary"
+            [disabled]="bookingPendingAssetId() === i.assetId"
+            (click)="bookNow(i)"
+          >
+            @if (bookingPendingAssetId() === i.assetId) {
+              <mat-spinner diameter="18"></mat-spinner>
+            } @else {
+              Book Now
+            }
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  }
+</div>
