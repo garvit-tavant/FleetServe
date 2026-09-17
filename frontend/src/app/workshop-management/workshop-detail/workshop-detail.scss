@@ -1,0 +1,49 @@
+.workshop-detail-container {
+  padding: 24px;
+}
+
+.workshop-detail-card {
+  max-width: 480px;
+  margin-bottom: 24px;
+}
+
+.workshop-detail-field {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.workshop-detail-field .label {
+  font-weight: 600;
+  min-width: 120px;
+}
+
+.workshop-detail-section {
+  margin-bottom: 24px;
+  max-width: 640px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.workshop-detail-table {
+  width: 100%;
+}
+
+.workshop-detail-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 32px;
+}
+
+.workshop-detail-error {
+  color: #d32f2f;
+}
+
+.workshop-detail-empty {
+  color: rgba(0, 0, 0, 0.6);
+}

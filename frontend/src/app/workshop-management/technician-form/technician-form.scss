@@ -1,0 +1,21 @@
+.technician-form-container {
+  padding: 24px;
+  max-width: 480px;
+}
+
+.technician-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.technician-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.technician-form-error {
+  color: #d32f2f;
+}

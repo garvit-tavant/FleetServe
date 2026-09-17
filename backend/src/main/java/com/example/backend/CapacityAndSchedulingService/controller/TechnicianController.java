@@ -93,15 +93,4 @@ public class TechnicianController {
                 .build();
     }
 
-    @GetMapping("/api/workshops/{workshopId}/technicians")
-    public ResponseEntity<List<TechnicianResponse>>
-    getTechniciansByWorkshop(
-            @PathVariable Long workshopId
-    ) {
-
-        return ResponseEntity.ok(
-                technicianService.getTechniciansByWorkshop(
-                        workshopId
-                ));
-    }
 }

@@ -1,0 +1,118 @@
+<div class="workshop-detail-container">
+  @if (loading()) {
+    <div class="workshop-detail-spinner">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else if (errorMessage()) {
+    <p class="workshop-detail-error">{{ errorMessage() }}</p>
+  } @else if (workshop(); as w) {
+    <mat-card class="workshop-detail-card">
+      <mat-card-header>
+        <mat-card-title>{{ w.code }}</mat-card-title>
+        <mat-card-subtitle>
+          <mat-chip [color]="w.active ? 'primary' : 'warn'" selected>
+            {{ w.active ? 'ACTIVE' : 'INACTIVE' }}
+          </mat-chip>
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="workshop-detail-field">
+          <span class="label">Depot ID:</span>
+          <span>{{ w.depotId }}</span>
+        </div>
+        <div class="workshop-detail-field">
+          <span class="label">Time Zone:</span>
+          <span>{{ w.timeZone }}</span>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-button routerLink="/workshops">Back to Workshops</button>
+        <button mat-raised-button [color]="w.active ? 'warn' : 'primary'" (click)="toggleWorkshopActive()">
+          {{ w.active ? 'Deactivate' : 'Activate' }}
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <div class="workshop-detail-section">
+      <div class="section-header">
+        <h2>Bays</h2>
+        <button mat-raised-button color="primary" (click)="addBay()">Add Bay</button>
+      </div>
+
+      @if (bays().length === 0) {
+        <p class="workshop-detail-empty">No bays found.</p>
+      } @else {
+        <table mat-table [dataSource]="bays()" class="mat-elevation-z2 workshop-detail-table">
+          <ng-container matColumnDef="bayCode">
+            <th mat-header-cell *matHeaderCellDef>Bay Code</th>
+            <td mat-cell *matCellDef="let bay">{{ bay.bayCode }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="active">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let bay">
+              <mat-chip [color]="bay.active ? 'primary' : 'warn'" selected>
+                {{ bay.active ? 'ACTIVE' : 'INACTIVE' }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="bayColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: bayColumns;"></tr>
+        </table>
+      }
+    </div>
+
+    <div class="workshop-detail-section">
+      <div class="section-header">
+        <h2>Technicians</h2>
+        <button mat-raised-button color="primary" (click)="addTechnician()">Add Technician</button>
+      </div>
+
+      @if (technicianError()) {
+        <p class="workshop-detail-error">{{ technicianError() }}</p>
+      } @else if (technicians().length === 0) {
+        <p class="workshop-detail-empty">No technicians found.</p>
+      } @else {
+        <table mat-table [dataSource]="technicians()" class="mat-elevation-z2 workshop-detail-table">
+          <ng-container matColumnDef="appUserId">
+            <th mat-header-cell *matHeaderCellDef>User ID</th>
+            <td mat-cell *matCellDef="let tech">{{ tech.appUserId }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="hourlyRate">
+            <th mat-header-cell *matHeaderCellDef>Hourly Rate</th>
+            <td mat-cell *matCellDef="let tech">{{ tech.hourlyRate }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="active">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let tech">
+              <mat-chip [color]="tech.active ? 'primary' : 'warn'" selected>
+                {{ tech.active ? 'ACTIVE' : 'INACTIVE' }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let tech">
+              <button
+                mat-button
+                [color]="tech.active ? 'warn' : 'primary'"
+                (click)="toggleTechnicianActive(tech)"
+              >
+                {{ tech.active ? 'Deactivate' : 'Activate' }}
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="technicianColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: technicianColumns;"></tr>
+        </table>
+      }
+    </div>
+  }
+</div>

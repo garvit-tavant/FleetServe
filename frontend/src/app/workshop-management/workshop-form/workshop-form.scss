@@ -1,0 +1,21 @@
+.workshop-form-container {
+  padding: 24px;
+  max-width: 480px;
+}
+
+.workshop-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.workshop-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.workshop-form-error {
+  color: #d32f2f;
+}

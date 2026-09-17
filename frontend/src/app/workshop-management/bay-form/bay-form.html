@@ -1,0 +1,28 @@
+<div class="bay-form-container">
+  <h1>Add Bay</h1>
+
+  @if (errorMessage()) {
+    <p class="bay-form-error">{{ errorMessage() }}</p>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bay-form">
+    <mat-form-field appearance="outline">
+      <mat-label>Bay Code</mat-label>
+      <input matInput formControlName="bayCode" />
+      @if (form.get('bayCode')?.hasError('required') && form.get('bayCode')?.touched) {
+        <mat-error>Bay code is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="bay-form-actions">
+      <button mat-button type="button" (click)="cancel()">Cancel</button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="submitting()">
+        @if (submitting()) {
+          <mat-spinner diameter="20"></mat-spinner>
+        } @else {
+          Create Bay
+        }
+      </button>
+    </div>
+  </form>
+</div>

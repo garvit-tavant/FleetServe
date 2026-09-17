@@ -1,7 +1,9 @@
 package com.example.backend.CapacityAndSchedulingService.controller;
 
+import com.example.backend.CapacityAndSchedulingService.dto.technician.TechnicianResponse;
 import com.example.backend.CapacityAndSchedulingService.dto.workshop.CreateWorkshopRequest;
 import com.example.backend.CapacityAndSchedulingService.dto.workshop.WorkshopResponse;
+import com.example.backend.CapacityAndSchedulingService.service.TechnicianService;
 import com.example.backend.CapacityAndSchedulingService.service.WorkshopService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -15,11 +17,26 @@ import java.util.List;
 public class WorkshopController {
 
     private final WorkshopService workshopService;
+    private final TechnicianService technicianService;
 
     public WorkshopController(
-            WorkshopService workshopService
+            WorkshopService workshopService,
+            TechnicianService technicianService
     ) {
         this.workshopService = workshopService;
+        this.technicianService = technicianService;
+    }
+
+    @GetMapping("/{workshopId}/technicians")
+    public ResponseEntity<List<TechnicianResponse>>
+    getTechniciansByWorkshop(
+            @PathVariable Long workshopId
+    ) {
+
+        return ResponseEntity.ok(
+                technicianService.getTechniciansByWorkshop(
+                        workshopId
+                ));
     }
 
     @PostMapping

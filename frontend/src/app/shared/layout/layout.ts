@@ -44,6 +44,7 @@ export class Layout {
     { label: 'Asset Classes', path: '/asset-classes', icon: 'category' },
     { label: 'Due Maintenance', path: '/due-maintenance', icon: 'build' },
     { label: 'Workshops', path: '/workshops', icon: 'engineering' },
+    { label: 'Technicians', path: '/technicians', icon: 'person' },
     { label: 'Bookings', path: '/bookings', icon: 'event' },
     { label: 'Inventory', path: '/inventory', icon: 'inventory_2' },
     { label: 'Work Orders', path: '/work-orders', icon: 'assignment' },

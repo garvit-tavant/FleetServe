@@ -1,0 +1,28 @@
+.technician-list-container {
+  padding: 24px;
+}
+
+.technician-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.technician-list-table {
+  width: 100%;
+}
+
+.technician-list-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 32px;
+}
+
+.technician-list-error {
+  color: #d32f2f;
+}
+
+.technician-list-empty {
+  color: rgba(0, 0, 0, 0.6);
+}

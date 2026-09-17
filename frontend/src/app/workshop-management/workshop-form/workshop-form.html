@@ -1,0 +1,48 @@
+<div class="workshop-form-container">
+  <h1>Add Workshop</h1>
+
+  @if (errorMessage()) {
+    <p class="workshop-form-error">{{ errorMessage() }}</p>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="workshop-form">
+    <mat-form-field appearance="outline">
+      <mat-label>Code</mat-label>
+      <input matInput formControlName="code" />
+      @if (form.get('code')?.hasError('required') && form.get('code')?.touched) {
+        <mat-error>Code is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Depot</mat-label>
+      <mat-select formControlName="depotId">
+        @for (depot of depots(); track depot.id) {
+          <mat-option [value]="depot.id">{{ depot.code }} - {{ depot.region }}</mat-option>
+        }
+      </mat-select>
+      @if (form.get('depotId')?.hasError('required') && form.get('depotId')?.touched) {
+        <mat-error>Depot is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Time Zone</mat-label>
+      <input matInput formControlName="timeZone" placeholder="e.g. Asia/Kolkata" />
+      @if (form.get('timeZone')?.hasError('required') && form.get('timeZone')?.touched) {
+        <mat-error>Time zone is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="workshop-form-actions">
+      <button mat-button type="button" routerLink="/workshops">Cancel</button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="submitting()">
+        @if (submitting()) {
+          <mat-spinner diameter="20"></mat-spinner>
+        } @else {
+          Create Workshop
+        }
+      </button>
+    </div>
+  </form>
+</div>

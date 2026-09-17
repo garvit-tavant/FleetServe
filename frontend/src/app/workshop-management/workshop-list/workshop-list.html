@@ -1,0 +1,48 @@
+<div class="workshop-list-container">
+  <div class="workshop-list-header">
+    <h1>Workshops</h1>
+    <button mat-raised-button color="primary" routerLink="/workshops/new">
+      <mat-icon>add</mat-icon>
+      Add Workshop
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="workshop-list-spinner">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else if (errorMessage()) {
+    <p class="workshop-list-error">{{ errorMessage() }}</p>
+  } @else if (workshops().length === 0) {
+    <p class="workshop-list-empty">No workshops found.</p>
+  } @else {
+    <table mat-table [dataSource]="workshops()" class="mat-elevation-z2 workshop-list-table">
+      <ng-container matColumnDef="code">
+        <th mat-header-cell *matHeaderCellDef>Code</th>
+        <td mat-cell *matCellDef="let workshop">{{ workshop.code }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="depotId">
+        <th mat-header-cell *matHeaderCellDef>Depot ID</th>
+        <td mat-cell *matCellDef="let workshop">{{ workshop.depotId }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="timeZone">
+        <th mat-header-cell *matHeaderCellDef>Time Zone</th>
+        <td mat-cell *matCellDef="let workshop">{{ workshop.timeZone }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="active">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let workshop">
+          <mat-chip [color]="workshop.active ? 'primary' : 'warn'" selected>
+            {{ workshop.active ? 'ACTIVE' : 'INACTIVE' }}
+          </mat-chip>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onRowClick(row)" class="workshop-row"></tr>
+    </table>
+  }
+</div>
