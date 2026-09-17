@@ -3,6 +3,7 @@ package com.example.backend.ExecutionService.controller;
 import com.example.backend.ExecutionService.dto.workorder.CompleteWorkOrderRequest;
 import com.example.backend.ExecutionService.dto.workorder.CreatePartRequirementRequest;
 import com.example.backend.ExecutionService.dto.workorder.IssueWorkOrderPartRequest;
+import com.example.backend.ExecutionService.dto.workorder.WorkOrderDetailsResponse;
 import com.example.backend.ExecutionService.dto.workorder.WorkOrderResponse;
 import com.example.backend.ExecutionService.service.WorkOrderAwaitPartsService;
 import com.example.backend.ExecutionService.service.WorkOrderIssuePartService;
@@ -12,6 +13,8 @@ import com.example.backend.ExecutionService.service.WorkOrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/work-orders")
@@ -33,6 +36,21 @@ public class WorkOrderController {
         this.workOrderAwaitPartsService = workOrderAwaitPartsService;
         this.workOrderIssuePartsService = workOrderIssuePartsService;
         this.workOrderResumeService = workOrderResumeService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<WorkOrderResponse>> getAllWorkOrders() {
+
+        return ResponseEntity.ok(
+                workOrderService.getAllWorkOrders());
+    }
+
+    @GetMapping("/{workOrderId}")
+    public ResponseEntity<WorkOrderDetailsResponse> getWorkOrder(
+            @PathVariable Long workOrderId) {
+
+        return ResponseEntity.ok(
+                workOrderService.getWorkOrder(workOrderId));
     }
 
     @PostMapping("/{workOrderId}/start")

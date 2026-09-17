@@ -1,0 +1,71 @@
+<div class="booking-list-container">
+  <div class="booking-list-header">
+    <h1>Bookings</h1>
+  </div>
+
+  @if (loading()) {
+    <div class="booking-list-spinner">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else if (errorMessage()) {
+    <p class="booking-list-error">{{ errorMessage() }}</p>
+  } @else if (bookings().length === 0) {
+    <p class="booking-list-empty">No bookings found.</p>
+  } @else {
+    <table mat-table [dataSource]="bookings()" class="mat-elevation-z2 booking-list-table">
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef>ID</th>
+        <td mat-cell *matCellDef="let b">{{ b.id }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="kind">
+        <th mat-header-cell *matHeaderCellDef>Kind</th>
+        <td mat-cell *matCellDef="let b">{{ b.kind }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let b">
+          <mat-chip [color]="b.status === 'CONFIRMED' ? 'primary' : b.status === 'CANCELLED' ? 'warn' : undefined" selected>
+            {{ b.status }}
+          </mat-chip>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="startAt">
+        <th mat-header-cell *matHeaderCellDef>Start</th>
+        <td mat-cell *matCellDef="let b">{{ b.startAt | date: 'short' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="endAt">
+        <th mat-header-cell *matHeaderCellDef>End</th>
+        <td mat-cell *matCellDef="let b">{{ b.endAt | date: 'short' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="workOrderStatus">
+        <th mat-header-cell *matHeaderCellDef>Work Order</th>
+        <td mat-cell *matCellDef="let b">
+          @if (b.workOrderId) {
+            <a [routerLink]="['/work-orders', b.workOrderId]">{{ b.workOrderNumber }}</a>
+            ({{ b.workOrderStatus }})
+          } @else {
+            —
+          }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let b">
+          <button mat-button color="primary" [routerLink]="['/bookings', b.id]">
+            <mat-icon>visibility</mat-icon>
+            View
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  }
+</div>

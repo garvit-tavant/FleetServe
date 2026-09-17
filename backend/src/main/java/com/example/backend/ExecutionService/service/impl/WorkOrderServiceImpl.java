@@ -955,4 +955,32 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 
         return normalized;
     }
+
+    @Override
+    public java.util.List<WorkOrderResponse> getAllWorkOrders() {
+
+        return workOrderRepository
+                .findAll()
+                .stream()
+                .map(workOrderMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    public com.example.backend.ExecutionService.dto.workorder.WorkOrderDetailsResponse
+    getWorkOrder(Long workOrderId) {
+
+        validateWorkOrderId(workOrderId);
+
+        WorkOrder workOrder =
+                workOrderRepository
+                        .findById(workOrderId)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Work order not found with id: "
+                                                + workOrderId));
+
+        return workOrderMapper.toDetailsResponse(
+                workOrder);
+    }
 }

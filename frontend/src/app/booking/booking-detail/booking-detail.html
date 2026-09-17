@@ -1,0 +1,62 @@
+<div class="booking-detail-container">
+  <a routerLink="/bookings" class="back-link">&larr; Back to Bookings</a>
+
+  @if (loading()) {
+    <div class="booking-detail-spinner">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else if (errorMessage()) {
+    <p class="booking-detail-error">{{ errorMessage() }}</p>
+  } @else if (booking(); as b) {
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Booking #{{ b.id }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="booking-detail-grid">
+        <div><strong>Kind:</strong> {{ b.kind }}</div>
+        <div>
+          <strong>Status:</strong>
+          <mat-chip [color]="b.status === 'CONFIRMED' ? 'primary' : b.status === 'CANCELLED' ? 'warn' : undefined" selected>
+            {{ b.status }}
+          </mat-chip>
+        </div>
+        <div><strong>Asset ID:</strong> {{ b.assetId }}</div>
+        <div><strong>Workshop ID:</strong> {{ b.workshopId }}</div>
+        <div><strong>Bay ID:</strong> {{ b.bayId }}</div>
+        <div><strong>Technician ID:</strong> {{ b.technicianId }}</div>
+        <div><strong>Start:</strong> {{ b.startAt | date: 'medium' }}</div>
+        <div><strong>End:</strong> {{ b.endAt | date: 'medium' }}</div>
+        @if (b.maintenancePlanId) {
+          <div><strong>Maintenance Plan ID:</strong> {{ b.maintenancePlanId }}</div>
+        }
+        @if (b.breakdownRequestId) {
+          <div><strong>Breakdown Request ID:</strong> {{ b.breakdownRequestId }}</div>
+        }
+        @if (b.workOrderId) {
+          <div>
+            <strong>Work Order:</strong>
+            <a [routerLink]="['/work-orders', b.workOrderId]">{{ b.workOrderNumber }}</a>
+            ({{ b.workOrderStatus }})
+          </div>
+        }
+      </mat-card-content>
+
+      @if (b.status === 'CONFIRMED') {
+        <mat-card-actions>
+          <form [formGroup]="cancelForm" (ngSubmit)="cancelBooking()" class="cancel-form">
+            <mat-form-field appearance="outline" class="reason-field">
+              <mat-label>Cancellation Reason</mat-label>
+              <input matInput formControlName="reason" />
+            </mat-form-field>
+            <button mat-raised-button color="warn" type="submit" [disabled]="cancelling()">
+              Cancel Booking
+            </button>
+          </form>
+          @if (cancelError()) {
+            <p class="booking-detail-error">{{ cancelError() }}</p>
+          }
+        </mat-card-actions>
+      }
+    </mat-card>
+  }
+</div>
