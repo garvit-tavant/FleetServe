@@ -5,6 +5,7 @@ import com.example.backend.ExecutionService.dto.workorder.CreatePartRequirementR
 import com.example.backend.ExecutionService.dto.workorder.IssueWorkOrderPartRequest;
 import com.example.backend.ExecutionService.dto.workorder.WorkOrderDetailsResponse;
 import com.example.backend.ExecutionService.dto.workorder.WorkOrderResponse;
+import com.example.backend.ExecutionService.dto.workorderlabour.WorkOrderLabourCreateRequest;
 import com.example.backend.ExecutionService.service.WorkOrderAwaitPartsService;
 import com.example.backend.ExecutionService.service.WorkOrderIssuePartService;
 import com.example.backend.ExecutionService.service.WorkOrderResumeService;
@@ -111,5 +112,16 @@ public class WorkOrderController {
         return workOrderResumeService.resumeWork(
                 workOrderId
         );
+    }
+
+    @PostMapping("/{workOrderId}/labour")
+    public ResponseEntity<WorkOrderDetailsResponse> addLabour(
+            @PathVariable Long workOrderId,
+            @RequestBody @Valid WorkOrderLabourCreateRequest request
+    ) {
+        WorkOrderDetailsResponse response =
+                workOrderService.addLabour(workOrderId, request);
+
+        return ResponseEntity.ok(response);
     }
 }

@@ -1,0 +1,41 @@
+.inventory-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.full-width-table {
+  width: 100%;
+}
+
+.spinner-row {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.error-text {
+  color: #b3261e;
+}
+
+.empty-text {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.low-stock-row {
+  background-color: #fdecea;
+}

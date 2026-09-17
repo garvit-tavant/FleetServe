@@ -61,6 +61,12 @@ export class WorkOrderDetail implements OnInit {
     quantity: [null as number | null, [Validators.required, Validators.min(0.001)]],
   });
 
+  addLabourForm = this.fb.group({
+    technicianId: [null as number | null, Validators.required],
+    hours: [null as number | null, [Validators.required, Validators.min(0.01)]],
+    rateApplied: [null as number | null, [Validators.required, Validators.min(0.01)]],
+  });
+
   private get workOrderId(): number {
     return Number(this.route.snapshot.paramMap.get('id'));
   }
@@ -143,6 +149,23 @@ export class WorkOrderDetail implements OnInit {
         quantity: this.issuePartForm.value.quantity!,
       })
     );
+  }
+
+  addLabour(): void {
+    if (this.addLabourForm.invalid) {
+      this.addLabourForm.markAllAsTouched();
+      return;
+    }
+
+    this.runAction(
+      this.workOrderService.addLabour(this.workOrderId, {
+        technicianId: this.addLabourForm.value.technicianId!,
+        hours: this.addLabourForm.value.hours!,
+        rateApplied: this.addLabourForm.value.rateApplied!,
+      })
+    );
+
+    this.addLabourForm.reset();
   }
 
   private runAction(obs: import('rxjs').Observable<unknown>): void {

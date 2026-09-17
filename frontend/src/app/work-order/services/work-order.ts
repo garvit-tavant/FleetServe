@@ -61,6 +61,12 @@ export interface IssueWorkOrderPartRequest {
   quantity: number;
 }
 
+export interface AddLabourRequest {
+  technicianId: number;
+  hours: number;
+  rateApplied: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class WorkOrderService {
   constructor(private http: HttpClient) {}
@@ -119,6 +125,16 @@ export class WorkOrderService {
     return this.http.post<WorkOrderResponse>(
       `${environment.apiUrl}/work-orders/${workOrderId}/resume`,
       {}
+    );
+  }
+
+  addLabour(
+    workOrderId: number,
+    payload: AddLabourRequest
+  ): Observable<WorkOrderDetailsResponse> {
+    return this.http.post<WorkOrderDetailsResponse>(
+      `${environment.apiUrl}/work-orders/${workOrderId}/labour`,
+      payload
     );
   }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import com.example.backend.ExecutionService.dto.workorder.CompleteWorkOrderRequest;
 import com.example.backend.ExecutionService.dto.workorder.WorkOrderDetailsResponse;
 import com.example.backend.ExecutionService.dto.workorder.WorkOrderResponse;
+import com.example.backend.ExecutionService.dto.workorderlabour.WorkOrderLabourCreateRequest;
 
 public interface WorkOrderService {
 
@@ -20,4 +21,8 @@ public interface WorkOrderService {
 
     WorkOrderDetailsResponse getWorkOrder(
             Long workOrderId);
+
+    WorkOrderDetailsResponse addLabour(
+            Long workOrderId,
+            WorkOrderLabourCreateRequest request);
 }

@@ -5,8 +5,10 @@ import com.example.backend.AssetManagamentService.exception.BusinessValidationEx
 import com.example.backend.AssetManagamentService.exception.ResourceNotFoundException;
 import com.example.backend.AssetManagamentService.repository.OdometerReadingRepository;
 import com.example.backend.CapacityAndSchedulingService.entity.Technician;
+import com.example.backend.CapacityAndSchedulingService.repository.TechnicianRepository;
 import com.example.backend.ExecutionService.dto.workorder.CompleteWorkOrderRequest;
 import com.example.backend.ExecutionService.dto.workorder.WorkOrderResponse;
+import com.example.backend.ExecutionService.dto.workorderlabour.WorkOrderLabourCreateRequest;
 import com.example.backend.ExecutionService.entity.Booking;
 import com.example.backend.ExecutionService.entity.BookingHistory;
 import com.example.backend.ExecutionService.entity.WorkOrder;
@@ -71,7 +73,9 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 
     private final UserRepository userRepository;
 
-    public WorkOrderServiceImpl(WorkOrderRepository workOrderRepository, Clock clock, WorkOrderMapper workOrderMapper, WorkOrderStateMachine workOrderStateMachine, SlaCheckpointService slaCheckpointService, WorkOrderLabourRepository workOrderLabourRepository, WorkOrderPartRepository workOrderPartRepository, BookingRepository bookingRepository, BreakdownRequestRepository breakdownRequestRepository, BreakdownRequestStateMachine breakdownRequestStateMachine, OdometerReadingRepository odometerReadingRepository, BookingHistoryRepository bookingHistoryRepository, UserRepository userRepository) {
+    private final TechnicianRepository technicianRepository;
+
+    public WorkOrderServiceImpl(WorkOrderRepository workOrderRepository, Clock clock, WorkOrderMapper workOrderMapper, WorkOrderStateMachine workOrderStateMachine, SlaCheckpointService slaCheckpointService, WorkOrderLabourRepository workOrderLabourRepository, WorkOrderPartRepository workOrderPartRepository, BookingRepository bookingRepository, BreakdownRequestRepository breakdownRequestRepository, BreakdownRequestStateMachine breakdownRequestStateMachine, OdometerReadingRepository odometerReadingRepository, BookingHistoryRepository bookingHistoryRepository, UserRepository userRepository, TechnicianRepository technicianRepository) {
         this.workOrderRepository = workOrderRepository;
         this.clock = clock;
         this.workOrderMapper = workOrderMapper;
@@ -85,6 +89,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
         this.odometerReadingRepository = odometerReadingRepository;
         this.bookingHistoryRepository = bookingHistoryRepository;
         this.userRepository = userRepository;
+        this.technicianRepository = technicianRepository;
     }
 
     @Override
@@ -982,5 +987,79 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 
         return workOrderMapper.toDetailsResponse(
                 workOrder);
+    }
+
+    @Override
+    @Transactional
+    public com.example.backend.ExecutionService.dto.workorder.WorkOrderDetailsResponse
+    addLabour(
+            Long workOrderId,
+            WorkOrderLabourCreateRequest request) {
+
+        validateWorkOrderId(workOrderId);
+
+        if (request == null) {
+            throw new IllegalArgumentException(
+                    "Labour request is required");
+        }
+
+        WorkOrder workOrder =
+                workOrderRepository
+                        .findById(workOrderId)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Work order not found with id: "
+                                                + workOrderId));
+
+        if (workOrder.getStatus() != WorkOrderStatus.IN_PROGRESS) {
+            throw new GlobalExceptionHandler.ConflictException(
+                    "Labour can only be recorded while the work order "
+                            + "is IN_PROGRESS");
+        }
+
+        Technician technician =
+                technicianRepository
+                        .findById(request.getTechnicianId())
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Technician not found with id: "
+                                                + request.getTechnicianId()));
+
+        if (workOrderLabourRepository
+                .existsByWorkOrder_IdAndTechnician_Id(
+                        workOrderId,
+                        technician.getId())) {
+
+            throw new GlobalExceptionHandler.ConflictException(
+                    "Labour has already been recorded for this "
+                            + "technician on work order " + workOrderId);
+        }
+
+        WorkOrderLabour labour = new WorkOrderLabour();
+        labour.setWorkOrder(workOrder);
+        labour.setTechnician(technician);
+        labour.setHours(request.getHours());
+        labour.setRateApplied(request.getRateApplied());
+
+        workOrderLabourRepository.save(labour);
+
+        BigDecimal labourCost =
+                valueOrZero(
+                        workOrderLabourRepository
+                                .calculateTotalLabourCost(workOrderId));
+
+        BigDecimal partCost =
+                valueOrZero(
+                        workOrderPartRepository
+                                .calculateTotalPartCost(workOrderId));
+
+        workOrder.setTotalCost(
+                normalizeCalculatedCost(
+                        labourCost.add(partCost)));
+
+        WorkOrder savedWorkOrder =
+                workOrderRepository.save(workOrder);
+
+        return workOrderMapper.toDetailsResponse(savedWorkOrder);
     }
 }

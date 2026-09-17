@@ -93,6 +93,31 @@
           </form>
         </mat-card-content>
       </mat-card>
+
+      <mat-card class="action-card">
+        <mat-card-header>
+          <mat-card-title>Add Labour</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="addLabourForm" (ngSubmit)="addLabour()" class="inline-form">
+            <mat-form-field appearance="outline">
+              <mat-label>Technician ID</mat-label>
+              <input matInput type="number" formControlName="technicianId" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Hours</mat-label>
+              <input matInput type="number" formControlName="hours" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Rate Applied</mat-label>
+              <input matInput type="number" formControlName="rateApplied" />
+            </mat-form-field>
+            <button mat-raised-button color="primary" type="submit" [disabled]="actionPending()">
+              Add Labour
+            </button>
+          </form>
+        </mat-card-content>
+      </mat-card>
     }
 
     @if (w.status === 'AWAITING_PARTS') {
