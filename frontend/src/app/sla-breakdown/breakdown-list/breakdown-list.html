@@ -1,1 +1,144 @@
-<p>breakdown-list works!</p>
+<div class="breakdown-container">
+  <h1>Breakdowns</h1>
+
+  <mat-card class="action-card">
+    <mat-card-header>
+      <mat-card-title>Report Breakdown</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="createForm" (ngSubmit)="createBreakdown()" class="inline-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Asset ID</mat-label>
+          <input matInput type="number" formControlName="assetId" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Priority</mat-label>
+          <mat-select formControlName="priority">
+            <mat-option value="LOW">Low</mat-option>
+            <mat-option value="MEDIUM">Medium</mat-option>
+            <mat-option value="HIGH">High</mat-option>
+            <mat-option value="CRITICAL">Critical</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="description-field">
+          <mat-label>Description</mat-label>
+          <input matInput formControlName="description" />
+        </mat-form-field>
+        <button mat-raised-button color="warn" type="submit" [disabled]="createSubmitting()">
+          Report Breakdown
+        </button>
+      </form>
+      @if (createError()) {
+        <p class="error-text">{{ createError() }}</p>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="action-card">
+    <mat-card-header>
+      <mat-card-title>Look Up Breakdown</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="inline-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Breakdown ID</mat-label>
+          <input matInput type="number" [formControl]="lookupIdControl" />
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="lookupBreakdown()" [disabled]="lookupLoading()">
+          Look Up
+        </button>
+      </div>
+      @if (lookupLoading()) {
+        <div class="spinner-row"><mat-spinner diameter="30"></mat-spinner></div>
+      }
+      @if (lookupError()) {
+        <p class="error-text">{{ lookupError() }}</p>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  @if (breakdown(); as b) {
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Breakdown #{{ b.id }} &mdash; {{ b.assetCode }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="breakdown-detail-grid">
+        <div>
+          <strong>Status:</strong>
+          <mat-chip
+            [color]="b.status === 'RESOLVED' ? 'primary' : b.status === 'CANCELLED' ? 'warn' : undefined"
+            selected
+          >
+            {{ b.status }}
+          </mat-chip>
+        </div>
+        <div><strong>Priority:</strong> {{ b.priority }}</div>
+        <div><strong>Description:</strong> {{ b.description }}</div>
+        <div><strong>Reported At:</strong> {{ b.reportedAt | date: 'medium' }}</div>
+        <div><strong>Depot ID:</strong> {{ b.depotId }}</div>
+        <div><strong>SLA Policy:</strong> {{ b.slaPolicyId ?? '—' }}</div>
+        <div>
+          <strong>Booking:</strong>
+          @if (b.bookingId) {
+            <a [routerLink]="['/bookings', b.bookingId]">#{{ b.bookingId }}</a>
+          } @else {
+            —
+          }
+        </div>
+      </mat-card-content>
+      <mat-card-actions class="breakdown-actions">
+        @for (s of statusOptions; track s) {
+          @if (s !== b.status) {
+            <button
+              mat-stroked-button
+              [disabled]="statusPending()"
+              (click)="updateStatus(s)"
+            >
+              Mark {{ s }}
+            </button>
+          }
+        }
+      </mat-card-actions>
+      @if (statusError()) {
+        <p class="error-text">{{ statusError() }}</p>
+      }
+    </mat-card>
+
+    @if (b.status === 'REPORTED') {
+      <mat-card class="action-card">
+        <mat-card-header>
+          <mat-card-title>Create Corrective Booking</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="bookingForm" (ngSubmit)="createCorrectiveBooking()" class="inline-form">
+            <mat-form-field appearance="outline">
+              <mat-label>Required Skill Code</mat-label>
+              <input matInput formControlName="requiredSkillCode" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Required Capability Code</mat-label>
+              <input matInput formControlName="requiredCapabilityCode" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Estimated Duration (min)</mat-label>
+              <input matInput type="number" formControlName="estimatedDurationMinutes" />
+            </mat-form-field>
+            <button mat-raised-button color="primary" type="submit" [disabled]="bookingSubmitting()">
+              Create Booking
+            </button>
+          </form>
+          @if (bookingError()) {
+            <p class="error-text">{{ bookingError() }}</p>
+          }
+          @if (bookingResult(); as br) {
+            <p>
+              Booking created:
+              <a [routerLink]="['/work-orders', br.workOrderId]">{{ br.workOrderNumber }}</a>
+              scheduled {{ br.start | date: 'medium' }} &ndash; {{ br.end | date: 'shortTime' }}
+            </p>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+  }
+</div>

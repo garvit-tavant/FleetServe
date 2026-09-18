@@ -1,0 +1,57 @@
+<div class="sla-reports-container">
+  <h1>SLA Reports</h1>
+
+  @if (loading()) {
+    <div class="spinner-row"><mat-spinner diameter="40"></mat-spinner></div>
+  } @else if (errorMessage()) {
+    <p class="error-text">{{ errorMessage() }}</p>
+  } @else {
+    <h2>SLA Compliance</h2>
+    @if (compliance().length === 0) {
+      <p class="empty-text">No compliance data available.</p>
+    } @else {
+      <table mat-table [dataSource]="compliance()" class="mat-elevation-z2 full-width-table">
+        <ng-container matColumnDef="priority">
+          <th mat-header-cell *matHeaderCellDef>Priority</th>
+          <td mat-cell *matCellDef="let c">{{ c.priority }}</td>
+        </ng-container>
+        <ng-container matColumnDef="evaluatedCases">
+          <th mat-header-cell *matHeaderCellDef>Evaluated Cases</th>
+          <td mat-cell *matCellDef="let c">{{ c.evaluatedCases }}</td>
+        </ng-container>
+        <ng-container matColumnDef="compliantCases">
+          <th mat-header-cell *matHeaderCellDef>Compliant Cases</th>
+          <td mat-cell *matCellDef="let c">{{ c.compliantCases }}</td>
+        </ng-container>
+        <ng-container matColumnDef="compliancePercent">
+          <th mat-header-cell *matHeaderCellDef>Compliance %</th>
+          <td mat-cell *matCellDef="let c">{{ c.compliancePercent | number: '1.1-1' }}%</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="complianceColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: complianceColumns;"></tr>
+      </table>
+    }
+
+    <h2>Mean Time To Repair (MTTR)</h2>
+    @if (mttr().length === 0) {
+      <p class="empty-text">No MTTR data available.</p>
+    } @else {
+      <table mat-table [dataSource]="mttr()" class="mat-elevation-z2 full-width-table">
+        <ng-container matColumnDef="assetClassCode">
+          <th mat-header-cell *matHeaderCellDef>Asset Class</th>
+          <td mat-cell *matCellDef="let m">{{ m.assetClassCode }}</td>
+        </ng-container>
+        <ng-container matColumnDef="meanTimeToRepairMinutes">
+          <th mat-header-cell *matHeaderCellDef>Mean Time To Repair (min)</th>
+          <td mat-cell *matCellDef="let m">{{ m.meanTimeToRepairMinutes | number: '1.0-1' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="sampleSize">
+          <th mat-header-cell *matHeaderCellDef>Sample Size</th>
+          <td mat-cell *matCellDef="let m">{{ m.sampleSize }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="mttrColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: mttrColumns;"></tr>
+      </table>
+    }
+  }
+</div>

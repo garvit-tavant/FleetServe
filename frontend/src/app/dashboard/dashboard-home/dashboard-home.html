@@ -1,1 +1,101 @@
-<p>dashboard-home works!</p>
+<div class="dashboard-container">
+  <h1>Dashboard</h1>
+
+  @if (loading()) {
+    <div class="spinner-row"><mat-spinner diameter="40"></mat-spinner></div>
+  } @else if (errorMessage()) {
+    <p class="error-text">{{ errorMessage() }}</p>
+  } @else {
+    <div class="cards-grid">
+      <mat-card class="summary-card">
+        <mat-card-header>
+          <mat-card-title>Assets</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="big-number">{{ totalAssets() }}</p>
+          @for (s of assetStatusCounts(); track s.label) {
+            <div class="status-row">
+              <span>{{ s.label }}</span>
+              <span>{{ s.count }}</span>
+            </div>
+          }
+        </mat-card-content>
+        <mat-card-actions>
+          <a routerLink="/assets">View Assets</a>
+        </mat-card-actions>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-header>
+          <mat-card-title>Work Orders</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="big-number">{{ totalWorkOrders() }}</p>
+          @for (s of workOrderStatusCounts(); track s.label) {
+            <div class="status-row">
+              <span>{{ s.label }}</span>
+              <span>{{ s.count }}</span>
+            </div>
+          }
+        </mat-card-content>
+        <mat-card-actions>
+          <a routerLink="/work-orders">View Work Orders</a>
+        </mat-card-actions>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-header>
+          <mat-card-title>Due Maintenance</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="status-row">
+            <span>Due Soon</span>
+            <span>{{ dueSoonCount() }}</span>
+          </div>
+          <div class="status-row">
+            <span>Overdue</span>
+            <span>{{ overdueCount() }}</span>
+          </div>
+        </mat-card-content>
+        <mat-card-actions>
+          <a routerLink="/due-maintenance">View Due Maintenance</a>
+        </mat-card-actions>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-header>
+          <mat-card-title>SLA Compliance</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          @if (overallCompliancePercent() === null) {
+            <p class="empty-text">No resolved breakdowns yet.</p>
+          } @else {
+            <p class="big-number">{{ overallCompliancePercent() | number: '1.1-1' }}%</p>
+          }
+          @for (c of slaCompliance(); track c.priority) {
+            <div class="status-row">
+              <span>{{ c.priority }}</span>
+              <span>{{ c.compliancePercent | number: '1.1-1' }}%</span>
+            </div>
+          }
+        </mat-card-content>
+        <mat-card-actions>
+          <a routerLink="/sla-reports">View SLA Reports</a>
+        </mat-card-actions>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-header>
+          <mat-card-title>Inventory Alerts</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="big-number">{{ reorderAlertCount() }}</p>
+          <p class="empty-text">parts below reorder level (across all workshops)</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <a routerLink="/inventory">View Inventory</a>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  }
+</div>

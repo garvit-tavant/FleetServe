@@ -49,6 +49,7 @@ export class Layout {
     { label: 'Inventory', path: '/inventory', icon: 'inventory_2' },
     { label: 'Work Orders', path: '/work-orders', icon: 'assignment' },
     { label: 'Breakdowns', path: '/breakdowns', icon: 'warning' },
+    { label: 'SLA Reports', path: '/sla-reports', icon: 'assessment' },
   ];
 
   isHandset = toSignal(

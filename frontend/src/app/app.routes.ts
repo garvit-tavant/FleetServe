@@ -23,6 +23,7 @@ import { PartList } from './inventory/part-list/part-list';
 import { WorkOrderList } from './work-order/work-order-list/work-order-list';
 import { WorkOrderDetail } from './work-order/work-order-detail/work-order-detail';
 import { BreakdownList } from './sla-breakdown/breakdown-list/breakdown-list';
+import { SlaReports } from './sla-breakdown/sla-reports/sla-reports';
 import { DashboardHome } from './dashboard/dashboard-home/dashboard-home';
 
 export const routes: Routes = [
@@ -55,6 +56,7 @@ export const routes: Routes = [
       { path: 'work-orders', component: WorkOrderList },
       { path: 'work-orders/:id', component: WorkOrderDetail },
       { path: 'breakdowns', component: BreakdownList },
+      { path: 'sla-reports', component: SlaReports },
     ],
   },
   { path: '**', redirectTo: '' },

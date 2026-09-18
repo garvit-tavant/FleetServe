@@ -1,0 +1,42 @@
+.dashboard-container {
+  padding: 8px 0;
+}
+
+.spinner-row {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.error-text {
+  color: #b00020;
+}
+
+.empty-text {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.85rem;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.big-number {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 4px 0;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0;
+  font-size: 0.9rem;
+}
