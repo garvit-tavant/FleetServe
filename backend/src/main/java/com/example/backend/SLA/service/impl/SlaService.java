@@ -41,24 +41,25 @@ import com.example.backend.SLA.repository.SlaCheckpointRepository;
 @Service
 @Transactional(readOnly = true)
 public class SlaService {
-    private final SlaCalculator slaCalculator;
     private final WorkOrderRepository workOrderRepository;
     private final SlaCheckpointRepository slaCheckpointRepository;
     private final SlaCalculatorResolver slaCalculatorResolver;
     private final WorkingCalendarRepository workingCalendarRepository;
     private final HolidayRepository holidayRepository;
+    private final SlaStatusUpdater slaStatusUpdater;
 
     public SlaService(SlaCalculator slaCalculator, WorkOrderRepository workOrderRepository,
                        SlaCheckpointRepository slaCheckpointRepository,
                        SlaCalculatorResolver slaCalculatorResolver,
                        WorkingCalendarRepository workingCalendarRepository,
-                       HolidayRepository holidayRepository) {
-        this.slaCalculator = slaCalculator;
+                       HolidayRepository holidayRepository,
+                       SlaStatusUpdater slaStatusUpdater) {
         this.workOrderRepository = workOrderRepository;
         this.slaCheckpointRepository = slaCheckpointRepository;
         this.slaCalculatorResolver = slaCalculatorResolver;
         this.workingCalendarRepository = workingCalendarRepository;
         this.holidayRepository = holidayRepository;
+        this.slaStatusUpdater = slaStatusUpdater;
     }
 
     /**
@@ -66,19 +67,23 @@ public class SlaService {
      * and OK/AT_RISK/BREACHED status, in one call.
      *
      * it updates all the sla_checkpoints where breakdown_request has not been RESOLVED OR CANCELED
+     *
+     * <p>Delegates to {@link SlaStatusUpdater#updateSlaStatus()}, a separate bean,
+     * rather than doing the work here directly. This class is annotated
+     * {@code @Transactional(readOnly = true)} at the class level; the underlying
+     * work persists breach flags via {@code @Modifying} UPDATE queries, which
+     * requires a writable transaction. Putting {@code @Transactional(REQUIRES_NEW)}
+     * directly on a method in *this* class would NOT work here because
+     * {@code SlaCompliance()} calls this method via plain self-invocation
+     * ({@code this.updateSlaStatus()}), which bypasses the Spring AOP proxy and
+     * silently ignores the annotation. Delegating to another bean forces the
+     * call through the proxy so REQUIRES_NEW actually takes effect - otherwise
+     * PostgreSQL rejects the UPDATE with "cannot execute UPDATE in a read-only
+     * transaction", 500-ing any read endpoint (e.g. SlaCompliance()) that calls
+     * this first.
      */
     public void updateSlaStatus() {
-        // Only evaluate SLA clocks for bookings that currently have an
-        // active WorkOrder (SCHEDULED / IN_PROGRESS / AWAITING_PARTS). This
-        // avoids wasting work on resolved/cancelled bookings and matches the
-        // user's requirement.
-    java.util.List<Long> activeBookingIds = workOrderRepository.findActiveBookingIds();
-        for (Long bookingId : activeBookingIds) {
-            if (bookingId == null) continue;
-            slaCalculator.isResponseBreach(bookingId);
-            slaCalculator.isResolutionBreach(bookingId);
-        }
-
+        slaStatusUpdater.updateSlaStatus();
     }
 
     public List<SlaComplianceReport> SlaCompliance() {

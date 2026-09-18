@@ -153,6 +153,18 @@ public class DueMaintenanceServiceImpl
                     continue;
                 }
 
+                boolean alreadyBooked =
+                        bookingRepository
+                                .existsByAsset_IdAndMaintenancePlan_IdAndStatusIn(
+                                        asset.getId(),
+                                        maintenancePlan.getId(),
+                                        List.of(
+                                                BookingStatus.CONFIRMED));
+
+                if (alreadyBooked) {
+                    continue;
+                }
+
                 DueMaintenanceResponse response =
                         buildDueMaintenanceResponse(
                                 asset,
@@ -1022,7 +1034,6 @@ public class DueMaintenanceServiceImpl
         Booking booking =
                 new Booking();
 
-        System.out.println("preventing oye");
         booking.setAsset(asset);
 
         booking.setWorkshop(
@@ -1047,14 +1058,12 @@ public class DueMaintenanceServiceImpl
         booking.setStatus(
                 BookingStatus.CONFIRMED);
 
-        System.out.println("===========\n"+booking.toString()+"==========\n");
-
         return booking;
     }
 
     private WorkOrder buildScheduledWorkOrder(
             Booking booking) {
-        System.out.println("inside work order");
+
         WorkOrder workOrder =
                 new WorkOrder();
 

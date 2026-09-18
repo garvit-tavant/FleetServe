@@ -34,11 +34,19 @@ public interface WorkingCalendarRepository
     // open time is the same across all days of the week for the workshop (a single
     // scalar result); if open time varies by dayOfWeek, this needs a dayOfWeek
     // parameter too, and SlaCalculator would need to pass the actual date being measured.
-    @Query("select wc.openTime from WorkingCalendar wc where wc.workshop.id = :workshopId order by wc.dayOfWeek asc")
+    //
+    // BUGFIX: a workshop has one working_calendar row PER day of week (up to 7
+    // rows), so the plain JPQL version (no LIMIT) called getSingleResult() and
+    // threw NonUniqueResultException whenever a workshop had more than one
+    // configured day - this was causing /api/reports/sla-compliance (and any
+    // SLA calculation touching a workshop with a real calendar) to 500. JPQL
+    // has no LIMIT keyword, so switched to a native query with LIMIT 1 to keep
+    // the same scalar LocalTime return type callers already depend on.
+    @Query(value = "select open_time from working_calendar where workshop_id = :workshopId order by day_of_week asc limit 1", nativeQuery = true)
     LocalTime findopentimebywokrshopID(@Param("workshopId") long workshop_id);
 
     // ans: same fix as above, for close time.
-    @Query("select wc.closeTime from WorkingCalendar wc where wc.workshop.id = :workshopId order by wc.dayOfWeek asc")
+    @Query(value = "select close_time from working_calendar where workshop_id = :workshopId order by day_of_week asc limit 1", nativeQuery = true)
     LocalTime findbyclosetimebyworkshopID(@Param("workshopId") long workshopID);
 
     List<WorkingCalendar> findByWorkshop_IdOrderByDayOfWeekAsc(Long workshopId);
